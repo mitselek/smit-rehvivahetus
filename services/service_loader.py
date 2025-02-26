@@ -79,6 +79,27 @@ def _load_service_info(services_dir: str) -> Dict:
     with open(info_path, 'r') as f:
         return yaml.safe_load(f)
 
+def _validate_service_doc(doc: Dict, filename: str) -> bool:
+    """Validate that the service documentation has all required fields."""
+    required_fields = {
+        'info': {'title'},
+        'paths': dict
+    }
+    
+    if not isinstance(doc.get('info'), dict):
+        logger.error(f"Missing or invalid 'info' object in {filename}")
+        return False
+        
+    if not doc['info'].get('title'):
+        logger.error(f"Missing service title in {filename}")
+        return False
+        
+    if not isinstance(doc.get('paths'), dict):
+        logger.error(f"Missing or invalid 'paths' object in {filename}")
+        return False
+        
+    return True
+
 def load_services(services_dir: str) -> List[Service]:
     """
     Loads and parses API documentation files from the specified directory to build service configurations.
@@ -114,6 +135,10 @@ def load_services(services_dir: str) -> List[Service]:
             with open(filepath, 'r') as f:
                 doc = json.load(f)
             
+            if not _validate_service_doc(doc, filename):
+                logger.warning(f"Skipping invalid service doc: {filename}")
+                continue
+
             name = doc.get('info', {}).get('title', '').split()[0]
             if not name:
                 logger.error(f"Service name not found in {filename}")
