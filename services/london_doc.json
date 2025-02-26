@@ -1,0 +1,172 @@
+{
+    "schemes": [],
+    "swagger": "2.0",
+    "info": {
+        "description": "Tire workshop service IOT integration.",
+        "title": "London tire workshop API",
+        "contact": {},
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "http://localhost:9003",
+    "basePath": "/api/v1",
+    "paths": {
+        "/tire-change-times/available": {
+            "get": {
+                "consumes": [
+                    "text/xml"
+                ],
+                "produces": [
+                    "text/xml"
+                ],
+                "summary": "List of available tire change times",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "default": "2006-01-02",
+                        "description": "search available times from date",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "default": "2030-01-02",
+                        "description": "search available times until date",
+                        "name": "until",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/london.tireChangeTimesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/london.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/london.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tire-change-times/{uuid}/booking": {
+            "put": {
+                "consumes": [
+                    "text/xml"
+                ],
+                "produces": [
+                    "text/xml"
+                ],
+                "summary": "Book tire change time",
+                "parameters": [
+                    {
+                        "maxLength": 36,
+                        "minLength": 36,
+                        "type": "string",
+                        "description": "available tire change time UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/london.tireChangeBookingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/london.tireChangeBookingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/london.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "The tire change time has already been booked by another contact",
+                        "schema": {
+                            "$ref": "#/definitions/london.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/london.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "london.errorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
+        "london.tireChangeBookingRequest": {
+            "type": "object",
+            "required": [
+                "contactInformation"
+            ],
+            "properties": {
+                "contactInformation": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "london.tireChangeBookingResponse": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "london.tireChangeTimesResponse": {
+            "type": "object",
+            "properties": {
+                "availableTimes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/london.tireChangeBookingResponse"
+                    }
+                }
+            }
+        }
+    }
+}

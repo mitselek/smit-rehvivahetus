@@ -1,0 +1,167 @@
+{
+    "schemes": [],
+    "swagger": "2.0",
+    "info": {
+        "description": "Tire workshop service IOT integration.",
+        "title": "Manchester tire workshop API",
+        "contact": {},
+        "license": {
+            "name": "MIT"
+        },
+        "version": "2.0"
+    },
+    "host": "http://localhost:9004",
+    "basePath": "/api/v2",
+    "paths": {
+        "/tire-change-times": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List of available tire change times",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "amount of tire change times per page",
+                        "name": "amount",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "The number of pages to skip before starting to collect the result set",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date",
+                        "default": "2006-01-02",
+                        "description": "search tire change times from date",
+                        "name": "from",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/manchester.tireChangeTimeBookingResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tire-change-times/{id}/booking": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Book tire change time",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "available tire change time ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/manchester.tireChangeBookingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.tireChangeTimeBookingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "The tire change time has already been booked",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/manchester.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "manchester.errorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "manchester.tireChangeBookingRequest": {
+            "type": "object",
+            "required": [
+                "contactInformation"
+            ],
+            "properties": {
+                "contactInformation": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "manchester.tireChangeTimeBookingResponse": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

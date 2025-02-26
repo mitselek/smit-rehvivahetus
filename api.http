@@ -1,0 +1,26 @@
+### Manchester API (v2) - List available tire change times
+GET http://localhost:9004/api/v2/tire-change-times?amount=100&page=0&from=2024-01-01
+Content-Type: application/json
+
+### Manchester API (v2) - Book a tire change time
+POST http://localhost:9004/api/v2/tire-change-times/1/booking
+Content-Type: application/json
+
+{
+    "contactInformation": "John Doe, +1234567890"
+}
+
+### London API (v1) - List available tire change times
+GET http://localhost:9003/api/v1/tire-change-times/available?from=2006-01-02&until=2030-01-02
+Content-Type: text/xml
+Accept: text/xml
+
+### London API (v1) - Book a tire change time
+PUT http://localhost:9003/api/v1/tire-change-times/550e8400-e29b-41d4-a716-446655440000/booking
+Content-Type: text/xml
+Accept: text/xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<tireChangeBookingRequest>
+    <contactInformation>Jane Smith, +9876543210</contactInformation>
+</tireChangeBookingRequest>
