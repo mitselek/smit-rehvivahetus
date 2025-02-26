@@ -43,6 +43,8 @@ The application expects the following services to be running:
 - London API at http://localhost:9003
 - Manchester API at http://localhost:9004
 
+To add a new API, create *service_name*_doc.json file in services folder.
+
 ## License
 
 MIT
