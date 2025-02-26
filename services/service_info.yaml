@@ -1,0 +1,10 @@
+london:
+  address: "1A Gunton Rd, London"
+  vehicle_types:
+    - "Sõiduauto"
+
+manchester:
+  address: "14 Bury New Rd, Manchester"
+  vehicle_types:
+    - "Sõiduauto"
+    - "Veoauto"

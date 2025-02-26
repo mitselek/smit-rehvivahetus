@@ -12,8 +12,14 @@ Module Contents:
 
 import json
 import os
+import yaml
+import logging
 from dataclasses import dataclass
 from typing import List, Dict, Optional
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Service:
@@ -27,6 +33,8 @@ class Service:
         content_type (str): The content type used for API calls (e.g., application/json, text/xml).
         available_times_path (str): The endpoint path to fetch available times.
         booking_path (str): The endpoint path for booking a tire change time.
+        address (str): The address of the service.
+        vehicle_types (List[str]): The types of vehicles supported by the service.
     """
     name: str
     version: str
@@ -34,6 +42,8 @@ class Service:
     content_type: str
     available_times_path: str
     booking_path: str
+    address: str
+    vehicle_types: List[str]
 
 def _find_endpoint(paths: Dict, method: str, keyword: str) -> Optional[str]:
     """
@@ -52,6 +62,23 @@ def _find_endpoint(paths: Dict, method: str, keyword: str) -> Optional[str]:
             return path
     return None
 
+def _load_service_info(services_dir: str) -> Dict:
+    """
+    Load additional service information from YAML file.
+
+    Args:
+        services_dir (str): The directory containing the service information file.
+
+    Returns:
+        Dict: A dictionary containing additional service information.
+    """
+    info_path = os.path.join(services_dir, 'service_info.yaml')
+    if not os.path.exists(info_path):
+        return {}
+    
+    with open(info_path, 'r') as f:
+        return yaml.safe_load(f)
+
 def load_services(services_dir: str) -> List[Service]:
     """
     Loads and parses API documentation files from the specified directory to build service configurations.
@@ -69,54 +96,93 @@ def load_services(services_dir: str) -> List[Service]:
         List[Service]: A list of Service objects configured based on the parsed documentation.
     """
     services = []
+    service_info = _load_service_info(services_dir)
     
     if not os.path.exists(services_dir):
         raise FileNotFoundError(f"Services directory not found: {services_dir}")
-        
+    
+    logger.info(f"Scanning directory: {services_dir}")
+    
     for filename in os.listdir(services_dir):
         if not filename.endswith('_doc.json'):
             continue
         
+        logger.info(f"Processing service file: {filename}")
         filepath = os.path.join(services_dir, filename)
-        with open(filepath, 'r') as f:
-            doc = json.load(f)
         
-        # Extract service name and version
-        name = doc.get('info', {}).get('title', '').split()[0]
-        version = doc.get('info', {}).get('version', '1.0')
-        
-        # Determine base URL from API docs (using "host" and "basePath")
-        host = doc.get('host', '').strip()
-        base_path = doc.get('basePath', '').strip()
-        if host:
-            base_url = host + base_path
-        else:
-            base_url = "http://localhost" + base_path
-        
-        # Get content type from the first available endpoint
-        first_path = next(iter(doc.get('paths', {}).values()), {})
-        first_method = next(iter(first_path.values()), {})
-        content_type = first_method.get('consumes', ['application/json'])[0]
-        
-        # Identify available times endpoint
-        available_times_path = _find_endpoint(doc.get('paths', {}), 'get', 'availableTimes')
-        if available_times_path is None:
-            # Fallback: try with "available" as keyword
-            available_times_path = _find_endpoint(doc.get('paths', {}), 'get', 'available')
-        if available_times_path is None:
-            # Fallback: choose the first GET endpoint available
-            for path, operations in doc.get('paths', {}).items():
-                if 'get' in operations:
-                    available_times_path = path
-                    break
-        
-        # Identify booking endpoint: try 'post' then fallback to 'put'
-        booking_path = _find_endpoint(doc.get('paths', {}), 'post', 'booking')
-        if booking_path is None:
-            booking_path = _find_endpoint(doc.get('paths', {}), 'put', 'booking')
+        try:
+            with open(filepath, 'r') as f:
+                doc = json.load(f)
+            
+            name = doc.get('info', {}).get('title', '').split()[0]
+            if not name:
+                logger.error(f"Service name not found in {filename}")
+                continue
 
-        services.append(Service(name, version, base_url, content_type, available_times_path, booking_path))
-    
+            # Extract service name and version
+            name = doc.get('info', {}).get('title', '').split()[0]
+            version = doc.get('info', {}).get('version', '1.0')
+            
+            # Determine base URL from API docs (using "host" and "basePath")
+            host = doc.get('host', '').strip()
+            base_path = doc.get('basePath', '').strip()
+            if host:
+                base_url = host + base_path
+            else:
+                base_url = "http://localhost" + base_path
+            
+            # Get content type from the first available endpoint
+            first_path = next(iter(doc.get('paths', {}).values()), {})
+            first_method = next(iter(first_path.values()), {})
+            content_type = first_method.get('consumes', ['application/json'])[0]
+            
+            # Identify available times endpoint
+            available_times_path = _find_endpoint(doc.get('paths', {}), 'get', 'availableTimes')
+            if available_times_path is None:
+                # Fallback: try with "available" as keyword
+                available_times_path = _find_endpoint(doc.get('paths', {}), 'get', 'available')
+            if available_times_path is None:
+                # Fallback: choose the first GET endpoint available
+                for path, operations in doc.get('paths', {}).items():
+                    if 'get' in operations:
+                        available_times_path = path
+                        break
+            
+            # Identify booking endpoint: try 'post' then fallback to 'put'
+            booking_path = _find_endpoint(doc.get('paths', {}), 'post', 'booking')
+            if booking_path is None:
+                booking_path = _find_endpoint(doc.get('paths', {}), 'put', 'booking')
+
+            if not available_times_path:
+                logger.warning(f"Available times endpoint not found for {name}")
+            if not booking_path:
+                logger.warning(f"Booking endpoint not found for {name}")
+
+            # Get additional info from service_info.yaml
+            name_lower = name.lower()
+            info = service_info.get(name_lower, {})
+            if not info:
+                logger.warning(f"No additional info found for {name} in service_info.yaml")
+            address = info.get('address', 'Address not available')
+            vehicle_types = info.get('vehicle_types', [])
+
+            service = Service(
+                name=name,
+                version=version,
+                base_url=base_url,
+                content_type=content_type,
+                available_times_path=available_times_path,
+                booking_path=booking_path,
+                address=address,
+                vehicle_types=vehicle_types
+            )
+            services.append(service)
+            logger.info(f"Successfully loaded service: {name} with base URL: {base_url}")
+            
+        except Exception as e:
+            logger.error(f"Error processing {filename}: {str(e)}")
+
+    logger.info(f"Total services loaded: {len(services)}")
     return services
 
 
