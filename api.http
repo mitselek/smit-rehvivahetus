@@ -1,5 +1,5 @@
 ### Manchester API (v2) - List available tire change times
-GET http://localhost:9004/api/v2/tire-change-times?amount=100&page=0&from=2024-01-01
+GET http://localhost:9004/api/v2/tire-change-times?amount=100&page=0&from=2025-03-01&until=2025-03-03
 Content-Type: application/json
 
 ### Manchester API (v2) - Book a tire change time

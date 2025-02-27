@@ -16,6 +16,7 @@ async function loadTimes() {
     })
 
     const apiUrl = '/api/times?' + params.toString()
+    console.log('API URL:', apiUrl)
     const response = await fetch(apiUrl)
     const times = await response.json()
     
