@@ -1,3 +1,5 @@
+const FEEDBACK_DELAY = 5000
+
 function formatDateTime(dateTimeStr) {
     const dt = new Date(dateTimeStr)
     return dt.toLocaleString()
@@ -11,6 +13,10 @@ function showError(errorMessage, successMessage, message) {
     errorMessage.textContent = message
     errorMessage.classList.remove('hidden')
     successMessage.classList.add('hidden')
+    
+    setTimeout(() => {
+        errorMessage.classList.add('hidden')
+    }, FEEDBACK_DELAY)
 }
 
 function showSuccess(errorMessage, successMessage, message) {
@@ -20,7 +26,7 @@ function showSuccess(errorMessage, successMessage, message) {
     
     setTimeout(() => {
         successMessage.classList.add('hidden')
-    }, 5000)
+    }, FEEDBACK_DELAY)
 }
 
 function hideMessages(errorMessage, successMessage) {
@@ -30,7 +36,6 @@ function hideMessages(errorMessage, successMessage) {
 
 async function fetchTimes() {
     showLoading(loadingElement, true)
-    hideMessages(errorMessage, successMessage)
     
     try {
         const response = await fetch('/api/times')
@@ -211,7 +216,7 @@ async function submitBooking(event) {
         if (data.success) {
             closeModal()
             showSuccess(errorMessage, successMessage, `Booking confirmed! Your booking ID is ${data.booking_id}. ${data.message}`)
-            fetchTimes()
+            setTimeout(fetchTimes, FEEDBACK_DELAY) // Delay fetching times to allow feedback to be shown
         } else {
             showError(errorMessage, successMessage, data.message || data.error || 'Booking failed. Please try again.')
         }
