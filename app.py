@@ -1,16 +1,28 @@
 from flask import Flask, render_template, jsonify
 import requests
 import xmltodict
+import yaml
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 import os
 from services import load_services
 from urllib.parse import quote
 
+def load_service_info():
+    """Load service information from YAML file"""
+    with open(os.path.join(os.path.dirname(__file__), 'services/service_info.yaml')) as f:
+        return yaml.safe_load(f)
+
 app = Flask(__name__)
 
 # Load services from API documentation (removed config argument)
 services = load_services(os.path.join(os.path.dirname(__file__), 'services'))
+service_info = load_service_info()
+
+def get_vehicle_types(service_name):
+    """Get supported vehicle types for a service"""
+    service_data = service_info.get(service_name.lower(), {})
+    return service_data.get('vehicle_types', ['Car'])  # Default to Car if not specified
 
 def handle_xml_response(response, service):
     data = xmltodict.parse(response.text)
@@ -18,15 +30,31 @@ def handle_xml_response(response, service):
     times = data.get('tireChangeTimesResponse', {}).get('availableTime', []) # changed from 'availableTimes'
     if isinstance(times, dict):
         times = [times]
-    return [{'time': t['time'], 'id': t['uuid'], 'location': service.name} for t in times]
+    vehicle_types = get_vehicle_types(service.name)
+    return [{
+        'time': t['time'], 
+        'id': t['uuid'], 
+        'location': service.name,
+        'vehicleTypes': vehicle_types
+    } for t in times]
 
 def handle_json_list_response(times, service):
-    return [{'time': t['time'], 'id': t['id'], 'location': service.name} 
-            for t in times if t.get('available', True)]
+    vehicle_types = get_vehicle_types(service.name)
+    return [{
+        'time': t['time'], 
+        'id': t['id'], 
+        'location': service.name,
+        'vehicleTypes': vehicle_types
+    } for t in times if t.get('available', True)]
 
 def handle_json_dict_response(times, service):
-    return [{'time': t['time'], 'id': t['id'], 'location': service.name} 
-            for t in times['availableTimes']]
+    vehicle_types = get_vehicle_types(service.name)
+    return [{
+        'time': t['time'], 
+        'id': t['id'], 
+        'location': service.name,
+        'vehicleTypes': vehicle_types
+    } for t in times['availableTimes']]
 
 def get_api_params(service):
     today = datetime.now().strftime('%Y-%m-%d')
