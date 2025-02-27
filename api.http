@@ -16,11 +16,11 @@ Content-Type: text/xml
 Accept: text/xml
 
 ### London API (v1) - Book a tire change time
-PUT http://localhost:9003/api/v1/tire-change-times/550e8400-e29b-41d4-a716-446655440000/booking
+PUT http://localhost:9003/api/v1/tire-change-times/33928042-1281-47f6-a7f1-f75412199304/booking
 Content-Type: text/xml
 Accept: text/xml
 
 <?xml version="1.0" encoding="UTF-8"?>
-<tireChangeBookingRequest>
-    <contactInformation>Jane Smith, +9876543210</contactInformation>
-</tireChangeBookingRequest>
+    <tireChangeBookingRequest>
+        <contactInformation>Mihkel Putrinš, 56560978</contactInformation>
+    </tireChangeBookingRequest>

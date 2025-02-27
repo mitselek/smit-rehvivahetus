@@ -120,42 +120,37 @@ def validate_booking_data(data):
 
 def book_v1_timeslot(service, booking_data, timeslot_id):
     """Book a timeslot using V1 API"""
-    url = f"{service.base_url}/v1/book"
+    url = f"{service.base_url}/tire-change-times/{timeslot_id}/booking"
     
+    # Fix XML formatting - ensure proper indentation and no extra whitespace
     xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
-    <bookingRequest>
-        <uuid>{timeslot_id}</uuid>
-        <customerName>{booking_data['name']}</customerName>
-        <customerEmail>{booking_data['email']}</customerEmail>
-        <customerPhone>{booking_data['phone']}</customerPhone>
-        <vehicle>{booking_data['vehicle']}</vehicle>
-        <serviceType>{booking_data['serviceType']}</serviceType>
-    </bookingRequest>"""
+<tireChangeBookingRequest>
+    <contactInformation>{booking_data['name']}, {booking_data['phone']}</contactInformation>
+</tireChangeBookingRequest>
+"""
     
-    headers = {'Content-Type': 'text/xml'}
-    response = requests.post(url, data=xml_data, headers=headers)
+    headers = {
+        'Content-Type': 'text/xml',
+        'Accept': 'text/xml'
+    }
+    print(f"Booking timeslot {timeslot_id} at {service.name}, url: {url}, xml: {xml_data}")
+    response = requests.put(url, data=xml_data, headers=headers)
     
     if response.status_code != 200:
         raise Exception(f"Booking failed: {response.text}")
     
     result = xmltodict.parse(response.text)
     return {
-        'booking_id': result['bookingResponse']['bookingId'],
+        'booking_id': timeslot_id,
         'status': 'confirmed'
     }
 
 def book_v2_timeslot(service, booking_data, timeslot_id):
     """Book a timeslot using V2 API"""
-    url = f"{service.base_url}/api/book/{timeslot_id}"
+    url = f"{service.base_url}/tire-change-times/{timeslot_id}/booking"
     
     json_data = {
-        'customer': {
-            'name': booking_data['name'],
-            'email': booking_data['email'],
-            'phone': booking_data['phone']
-        },
-        'vehicle': booking_data['vehicle'],
-        'serviceType': booking_data['serviceType']
+        'contactInformation': f"{booking_data['name']}, {booking_data['phone']}"
     }
     
     headers = {'Content-Type': 'application/json'}
@@ -166,8 +161,8 @@ def book_v2_timeslot(service, booking_data, timeslot_id):
     
     result = response.json()
     return {
-        'booking_id': result['id'],
-        'status': result['status']
+        'booking_id': timeslot_id,  # Use timeslot ID as booking ID for V2 API
+        'status': 'confirmed'
     }
 
 @app.route('/api/book', methods=['POST'])
