@@ -113,7 +113,10 @@ def get_service_times(service):
 
 def validate_booking_data(data):
     required = ['timeslotId', 'location', 'name', 'email', 'phone', 'vehicle', 'serviceType']
-    return all(field in data and data[field] for field in required)
+    if not all(field in data for field in required):
+        print("Missing fields in request:", data)
+        return False
+    return True
 
 def book_v1_timeslot(service, booking_data, timeslot_id):
     """Book a timeslot using V1 API"""
@@ -170,14 +173,22 @@ def book_v2_timeslot(service, booking_data, timeslot_id):
 @app.route('/api/book', methods=['POST'])
 def book_appointment():
     data = request.get_json()
+    print("Received booking request:", data)  # Debug print
     
     if not validate_booking_data(data):
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({
+            'success': False,
+            'error': 'Missing required fields',
+            'received_data': data  # Include received data in error response
+        }), 400
     
     # Find the service for this location
     service = next((s for s in services if s.name == data['location']), None)
     if not service:
-        return jsonify({'error': 'Invalid location'}), 400
+        return jsonify({
+            'success': False,
+            'error': f"Invalid location: {data['location']}"
+        }), 400
     
     try:
         # Choose booking function based on API version
@@ -196,6 +207,7 @@ def book_appointment():
     except Exception as e:
         app.logger.error(f"Booking error: {str(e)}")
         return jsonify({
+            'success': False,
             'error': 'Failed to process booking',
             'message': str(e)
         }), 500

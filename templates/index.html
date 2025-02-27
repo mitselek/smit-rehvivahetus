@@ -44,11 +44,16 @@
             font-weight: bold;
         }
         
-        select, button {
+        select, button, input {
             padding: 10px;
             border-radius: 4px;
             border: 1px solid #ddd;
             font-size: 16px;
+        }
+        
+        input {
+            width: 100%;
+            box-sizing: border-box;
         }
         
         button {
@@ -125,7 +130,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important; /* Use !important to override other display values */
         }
         
         .location-badge {
@@ -145,10 +150,70 @@
             margin-right: 5px;
         }
         
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 5px;
+            padding: 25px;
+            width: 80%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        .close-button {
+            background-color: #95a5a6;
+        }
+        
+        .confirm-button {
+            background-color: #27ae60;
+        }
+        
         @media (max-width: 768px) {
             .times-container {
                 grid-template-columns: 1fr;
             }
+            
+            .modal {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -159,25 +224,26 @@
     
     <div class="filters">
         <div class="filter-group">
-            <label for="vehicle-type">Vehicle Type:</label>
-            <select id="vehicle-type">
+            <label for="vehicle-type-filter">Vehicle Type:</label>
+            <select id="vehicle-type-filter" name="vehicleType">
                 <option value="all">All Vehicles</option>
-                <option value="car">Car</option>
-                <option value="truck">Truck</option>
+                <option value="Car">Car</option>
+                <option value="Truck">Truck</option>
+                <option value="SUV">SUV</option>
             </select>
         </div>
         
         <div class="filter-group">
-            <label for="location">Location:</label>
-            <select id="location">
+            <label for="location-filter">Location:</label>
+            <select id="location-filter" name="location">
                 <option value="all">All Locations</option>
                 <!-- Will be populated dynamically -->
             </select>
         </div>
         
         <div class="filter-group">
-            <label for="date-range">Date Range:</label>
-            <select id="date-range">
+            <label for="date-range-filter">Date Range:</label>
+            <select id="date-range-filter" name="dateRange">
                 <option value="today">Today</option>
                 <option value="tomorrow">Tomorrow</option>
                 <option value="week" selected>Next 5 Days</option>
@@ -198,17 +264,77 @@
         </div>
     </div>
     
+    <!-- Booking Modal - fixed modal class and initial state -->
+    <div id="booking-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Book Appointment</h2>
+            <form id="booking-form">
+                <input type="hidden" id="booking-timeslot-id" name="timeslotId">
+                <input type="hidden" id="booking-location" name="location">
+                
+                <div class="form-group">
+                    <div class="field-label">Appointment Details</div>
+                    <div id="booking-appointment-details" role="region" aria-label="Appointment Details"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-name">Full Name:</label>
+                    <input type="text" id="booking-name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-email">Email Address:</label>
+                    <input type="email" id="booking-email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-phone">Phone Number:</label>
+                    <input type="tel" id="booking-phone" name="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-vehicle">Vehicle Details:</label>
+                    <input type="text" id="booking-vehicle" name="vehicle" placeholder="Make, Model, Year" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-service-type">Service Type:</label>
+                    <select id="booking-service-type" name="serviceType" required>
+                        <option value="">Select Service Type</option>
+                        <option value="Regular">Regular Tire Change</option>
+                        <option value="Premium">Premium Tire Change</option>
+                        <option value="Emergency">Emergency Tire Service</option>
+                    </select>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" id="close-modal" class="close-button">Cancel</button>
+                    <button type="submit" class="confirm-button">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure modal is hidden initially
+            const bookingModal = document.getElementById('booking-modal');
+            bookingModal.classList.add('hidden');
+            
             // Elements
-            const vehicleTypeSelect = document.getElementById('vehicle-type');
-            const locationSelect = document.getElementById('location');
-            const dateRangeSelect = document.getElementById('date-range');
+            const vehicleTypeSelect = document.getElementById('vehicle-type-filter');
+            const locationSelect = document.getElementById('location-filter');
+            const dateRangeSelect = document.getElementById('date-range-filter');
             const searchButton = document.getElementById('search-button');
             const timesContainer = document.getElementById('times-container');
             const loadingElement = document.getElementById('loading');
             const errorMessage = document.getElementById('error-message');
             const successMessage = document.getElementById('success-message');
+            const bookingForm = document.getElementById('booking-form');
+            const closeModalButton = document.getElementById('close-modal');
+            const timeslotIdInput = document.getElementById('booking-timeslot-id');
+            const locationIdInput = document.getElementById('booking-location');
+            const appointmentDetailsElement = document.getElementById('booking-appointment-details');
             
             // Store all times
             let allTimes = [];
@@ -221,6 +347,8 @@
             vehicleTypeSelect.addEventListener('change', filterTimes);
             locationSelect.addEventListener('change', filterTimes);
             dateRangeSelect.addEventListener('change', filterTimes);
+            closeModalButton.addEventListener('click', closeModal);
+            bookingForm.addEventListener('submit', submitBooking);
             
             function fetchTimes() {
                 showLoading(true);
@@ -268,20 +396,17 @@
                 const location = locationSelect.value;
                 const dateRange = dateRangeSelect.value;
                 
-                // Filter by vehicle type and location
+                // Filter by vehicle type, location, and date
                 let filteredTimes = allTimes.filter(time => {
                     // Apply vehicle type filter
-                    // Note: In a real implementation, this would be based on actual vehicle data
-                    // For demo purposes, we'll assume odd-numbered IDs are for cars and even-numbered IDs are for trucks
-                    const timeId = time.id.toString();
-                    const lastChar = timeId[timeId.length - 1];
-                    const isCarAppointment = parseInt(lastChar) % 2 === 1;
-                    
-                    if (vehicleType === 'car' && !isCarAppointment) return false;
-                    if (vehicleType === 'truck' && isCarAppointment) return false;
+                    if (vehicleType !== 'all' && !time.vehicleTypes.includes(vehicleType)) {
+                        return false;
+                    }
                     
                     // Apply location filter
-                    if (location !== 'all' && time.location !== location) return false;
+                    if (location !== 'all' && time.location !== location) {
+                        return false;
+                    }
                     
                     // Apply date filter
                     const timeDate = new Date(time.time);
@@ -291,8 +416,12 @@
                     const tomorrow = new Date(today);
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     
-                    if (dateRange === 'today' && timeDate.getDate() !== today.getDate()) return false;
-                    if (dateRange === 'tomorrow' && timeDate.getDate() !== tomorrow.getDate()) return false;
+                    if (dateRange === 'today' && timeDate.getDate() !== today.getDate()) {
+                        return false;
+                    }
+                    if (dateRange === 'tomorrow' && timeDate.getDate() !== tomorrow.getDate()) {
+                        return false;
+                    }
                     
                     return true;
                 });
@@ -326,19 +455,23 @@
                         minute: '2-digit'
                     });
                     
-                    // Determine if this is a car or truck appointment (demo logic)
-                    const timeId = time.id.toString();
-                    const lastChar = timeId[timeId.length - 1];
-                    const isCarAppointment = parseInt(lastChar) % 2 === 1;
-                    const vehicleType = isCarAppointment ? 'car' : 'truck';
-                    const vehicleIcon = isCarAppointment ? '🚗' : '🚚';
+                    // Determine vehicle icon based on supported types
+                    let vehicleIcon = '🚗';
+                    if (time.vehicleTypes.includes('Truck')) {
+                        vehicleIcon = '🚚';
+                    } else if (time.vehicleTypes.includes('SUV') && !time.vehicleTypes.includes('Car')) {
+                        vehicleIcon = '🚙';
+                    }
+                    
+                    // Create vehicle types display string
+                    const vehicleTypesText = time.vehicleTypes.join(', ');
                     
                     timeCard.innerHTML = `
                         <h3>${vehicleIcon} ${formattedDate}</h3>
                         <p>Time: ${formattedTime}</p>
-                        <p>Vehicle Type: ${vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)}</p>
+                        <p>Vehicle Types: ${vehicleTypesText}</p>
                         <p>Location: ${time.location}<span class="location-badge">${time.location.substring(0, 3).toUpperCase()}</span></p>
-                        <button class="book-button" data-id="${time.id}" data-time="${time.time}" data-location="${time.location}">Book This Slot</button>
+                        <button class="book-button" data-id="${time.id}" data-time="${time.time}" data-location="${time.location}" data-vehicle-types="${time.vehicleTypes.join(',')}">Book This Slot</button>
                     `;
                     
                     timesContainer.appendChild(timeCard);
@@ -346,24 +479,99 @@
                 
                 // Add event listeners to book buttons
                 document.querySelectorAll('.book-button').forEach(button => {
-                    button.addEventListener('click', handleBooking);
+                    button.addEventListener('click', openBookingModal);
                 });
             }
             
-            function handleBooking(event) {
+            function openBookingModal(event) {
                 const button = event.target;
                 const timeId = button.getAttribute('data-id');
                 const timeValue = button.getAttribute('data-time');
                 const location = button.getAttribute('data-location');
+                const vehicleTypes = button.getAttribute('data-vehicle-types').split(',');
                 
-                // In a real implementation, you would make an API call to book the appointment
-                // For demo purposes, we'll just show a success message
-                showSuccess(`Successfully booked appointment at ${location} on ${new Date(timeValue).toLocaleString()}`);
+                // Format time for display
+                const timeDate = new Date(timeValue);
+                const formattedDate = timeDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
                 
-                // Disable the button to prevent multiple bookings
-                button.disabled = true;
-                button.textContent = 'Booked';
-                button.style.backgroundColor = '#95a5a6';
+                const formattedTime = timeDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Set hidden input values
+                timeslotIdInput.value = timeId;
+                locationIdInput.value = location;
+                
+                // Set appointment details
+                appointmentDetailsElement.innerHTML = `
+                    <strong>Date:</strong> ${formattedDate}<br>
+                    <strong>Time:</strong> ${formattedTime}<br>
+                    <strong>Location:</strong> ${location}<br>
+                    <strong>Supported Vehicles:</strong> ${vehicleTypes.join(', ')}
+                `;
+                
+                // Show the modal
+                bookingModal.classList.remove('hidden');
+                bookingModal.classList.add('visible');
+            }
+            
+            function closeModal() {
+                bookingModal.classList.add('hidden');
+                bookingModal.classList.remove('visible');
+                bookingForm.reset();
+            }
+            
+            function submitBooking(event) {
+                event.preventDefault();
+                
+                // Show loading indicator
+                showLoading(true);
+                
+                // Get form data
+                const formData = new FormData(bookingForm);
+                const bookingData = {};
+                
+                // Convert FormData to JSON object
+                formData.forEach((value, key) => {
+                    bookingData[key] = value;
+                });
+                
+                // Send booking request
+                fetch('/api/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showLoading(false);
+                    
+                    if (data.success) {
+                        // Close the modal
+                        closeModal();
+                        
+                        // Show success message
+                        showSuccess(`Booking confirmed! Your booking ID is ${data.booking_id}. ${data.message}`);
+                        
+                        // Refresh times
+                        fetchTimes();
+                    } else {
+                        showError(data.message || data.error || 'Booking failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    showLoading(false);
+                    showError('An error occurred while processing your booking.');
+                    console.error('Booking error:', error);
+                });
             }
             
             function showLoading(show) {
