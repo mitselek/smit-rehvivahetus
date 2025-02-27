@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, url_for
 import requests
 import xmltodict
 import yaml
@@ -13,7 +13,7 @@ def load_service_info():
     with open(os.path.join(os.path.dirname(__file__), 'services/service_info.yaml')) as f:
         return yaml.safe_load(f)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Load services from API documentation (removed config argument)
 services = load_services(os.path.join(os.path.dirname(__file__), 'services'))
