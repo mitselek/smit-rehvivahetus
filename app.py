@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
 import xmltodict
 import yaml
@@ -110,6 +110,95 @@ def get_service_times(service):
     except Exception as e:
         app.logger.error(f"Error parsing response from {service.name}: {e}")
         return []
+
+def validate_booking_data(data):
+    required = ['timeslotId', 'location', 'name', 'email', 'phone', 'vehicle', 'serviceType']
+    return all(field in data and data[field] for field in required)
+
+def book_v1_timeslot(service, booking_data, timeslot_id):
+    """Book a timeslot using V1 API"""
+    url = f"{service.base_url}/v1/book"
+    
+    xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
+    <bookingRequest>
+        <uuid>{timeslot_id}</uuid>
+        <customerName>{booking_data['name']}</customerName>
+        <customerEmail>{booking_data['email']}</customerEmail>
+        <customerPhone>{booking_data['phone']}</customerPhone>
+        <vehicle>{booking_data['vehicle']}</vehicle>
+        <serviceType>{booking_data['serviceType']}</serviceType>
+    </bookingRequest>"""
+    
+    headers = {'Content-Type': 'text/xml'}
+    response = requests.post(url, data=xml_data, headers=headers)
+    
+    if response.status_code != 200:
+        raise Exception(f"Booking failed: {response.text}")
+    
+    result = xmltodict.parse(response.text)
+    return {
+        'booking_id': result['bookingResponse']['bookingId'],
+        'status': 'confirmed'
+    }
+
+def book_v2_timeslot(service, booking_data, timeslot_id):
+    """Book a timeslot using V2 API"""
+    url = f"{service.base_url}/api/book/{timeslot_id}"
+    
+    json_data = {
+        'customer': {
+            'name': booking_data['name'],
+            'email': booking_data['email'],
+            'phone': booking_data['phone']
+        },
+        'vehicle': booking_data['vehicle'],
+        'serviceType': booking_data['serviceType']
+    }
+    
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(url, json=json_data, headers=headers)
+    
+    if response.status_code != 200:
+        raise Exception(f"Booking failed: {response.status_code}")
+    
+    result = response.json()
+    return {
+        'booking_id': result['id'],
+        'status': result['status']
+    }
+
+@app.route('/api/book', methods=['POST'])
+def book_appointment():
+    data = request.get_json()
+    
+    if not validate_booking_data(data):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    # Find the service for this location
+    service = next((s for s in services if s.name == data['location']), None)
+    if not service:
+        return jsonify({'error': 'Invalid location'}), 400
+    
+    try:
+        # Choose booking function based on API version
+        if service.content_type == 'text/xml' or 'v1' in service.available_times_path:
+            result = book_v1_timeslot(service, data, data['timeslotId'])
+        else:
+            result = book_v2_timeslot(service, data, data['timeslotId'])
+        
+        return jsonify({
+            'success': True,
+            'booking_id': result['booking_id'],
+            'status': result['status'],
+            'message': 'Booking confirmed successfully'
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Booking error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to process booking',
+            'message': str(e)
+        }), 500
 
 @app.route('/')
 def index():
