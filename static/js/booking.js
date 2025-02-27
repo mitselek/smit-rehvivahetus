@@ -184,6 +184,11 @@ function openBookingModal(event) {
     
     bookingModal.classList.remove('hidden')
     bookingModal.classList.add('visible')
+    
+    // Set focus to name field. Also emulate a click
+    const nameInput = document.getElementById('booking-name')
+    nameInput.focus()
+    nameInput.click()
 }
 
 function closeModal() {
