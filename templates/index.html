@@ -1,14 +1,600 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Tire Change Booking</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tire Change Service Booking</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .timeslots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .timeslot {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .timeslot:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timeslot h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .timeslot p {
+            margin: 8px 0;
+        }
+        
+        .timeslot button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .timeslot button:hover {
+            background-color: #2980b9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #777;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .booking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .submit-booking {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .submit-booking:hover {
+            background-color: #27ae60;
+        }
+        
+        .no-timeslots {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="header-container">
+            <div class="logo">TireChange Pro</div>
+        </div>
+    </header>
+    
     <div class="container">
-        <h1>Available Tire Change Times</h1>
-        <div id="timesList"></div>
+        <div class="title">
+            <h1>Book Your Tire Change Service</h1>
+            <p>Select from available time slots at service centers near you</p>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="location-filter">Service Location</label>
+                <select id="location-filter">
+                    <option value="all">All Locations</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="date-filter">Date Range</label>
+                <select id="date-filter">
+                    <option value="all">All Available Dates</option>
+                    <option value="today">Today</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="week">Next 7 Days</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="time-filter">Time of Day</label>
+                <select id="time-filter">
+                    <option value="all">All Times</option>
+                    <option value="morning">Morning (8AM-12PM)</option>
+                    <option value="afternoon">Afternoon (12PM-5PM)</option>
+                    <option value="evening">Evening (After 5PM)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            Loading available time slots...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            Error loading time slots. Please try again later.
+        </div>
+        
+        <div id="timeslots" class="timeslots">
+            <!-- Time slots will be added here dynamically -->
+        </div>
+        
+        <div id="no-timeslots" class="no-timeslots" style="display: none;">
+            <h2>No available time slots match your criteria</h2>
+            <p>Try adjusting your filters or check back later for more availability.</p>
+        </div>
     </div>
+    
+    <div id="booking-modal" class="booking-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Your Booking</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <form id="booking-form">
+                <input type="hidden" id="timeslot-id">
+                <input type="hidden" id="timeslot-location">
+                
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vehicle">Vehicle Information</label>
+                    <input type="text" id="vehicle" placeholder="Year, Make, Model" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="service-type">Service Type</label>
+                    <select id="service-type" required>
+                        <option value="">Select a service</option>
+                        <option value="seasonal">Seasonal Tire Change</option>
+                        <option value="new-tires">New Tire Installation</option>
+                        <option value="rotation">Tire Rotation</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-booking">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeslotsContainer = document.getElementById('timeslots');
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const noTimeslotsElement = document.getElementById('no-timeslots');
+            const locationFilter = document.getElementById('location-filter');
+            const dateFilter = document.getElementById('date-filter');
+            const timeFilter = document.getElementById('time-filter');
+            const bookingModal = document.getElementById('booking-modal');
+            const closeModalBtn = document.querySelector('.close-modal');
+            const bookingForm = document.getElementById('booking-form');
+            const timeslotIdInput = document.getElementById('timeslot-id');
+            const timeslotLocationInput = document.getElementById('timeslot-location');
+            
+            let allTimeslots = [];
+            
+            // Load available time slots
+            fetchTimeslots();
+            
+            // Event Listeners
+            locationFilter.addEventListener('change', filterTimeslots);
+            dateFilter.addEventListener('change', filterTimeslots);
+            timeFilter.addEventListener('change', filterTimeslots);
+            
+            closeModalBtn.addEventListener('click', function() {
+                bookingModal.style.display = 'none';
+            });
+            
+            bookingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real application, this is where you would send the booking data to the server
+                const formData = {
+                    timeslotId: timeslotIdInput.value,
+                    location: timeslotLocationInput.value,
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    vehicle: document.getElementById('vehicle').value,
+                    serviceType: document.getElementById('service-type').value
+                };
+                
+                console.log('Booking submitted:', formData);
+                
+                // Show confirmation
+                alert('Booking confirmed! You will receive a confirmation email shortly.');
+                bookingModal.style.display = 'none';
+                bookingForm.reset();
+                
+                // In a real app, you would remove the booked timeslot from the display
+                // and possibly refresh the available timeslots
+            });
+            
+            // Close modal when clicking outside the content
+            window.addEventListener('click', function(e) {
+                if (e.target === bookingModal) {
+                    bookingModal.style.display = 'none';
+                }
+            });
+            
+            // Function to fetch timeslots from the API
+            function fetchTimeslots() {
+                loadingElement.style.display = 'block';
+                errorElement.style.display = 'none';
+                timeslotsContainer.style.display = 'none';
+                noTimeslotsElement.style.display = 'none';
+                
+                fetch('/api/times')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        allTimeslots = data;
+                        
+                        // Populate location filter
+                        const locations = [...new Set(data.map(item => item.location))];
+                        locationFilter.innerHTML = '<option value="all">All Locations</option>';
+                        locations.forEach(location => {
+                            const option = document.createElement('option');
+                            option.value = location;
+                            option.textContent = location;
+                            locationFilter.appendChild(option);
+                        });
+                        
+                        displayTimeslots(allTimeslots);
+                        loadingElement.style.display = 'none';
+                        
+                        if (allTimeslots.length === 0) {
+                            noTimeslotsElement.style.display = 'block';
+                        } else {
+                            timeslotsContainer.style.display = 'grid';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching timeslots:', error);
+                        loadingElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                    });
+            }
+            
+            // Function to display timeslots
+            function displayTimeslots(timeslots) {
+                timeslotsContainer.innerHTML = '';
+                
+                if (timeslots.length === 0) {
+                    noTimeslotsElement.style.display = 'block';
+                    timeslotsContainer.style.display = 'none';
+                    return;
+                }
+                
+                noTimeslotsElement.style.display = 'none';
+                timeslotsContainer.style.display = 'grid';
+                
+                timeslots.forEach(slot => {
+                    const datetime = new Date(slot.time);
+                    const formattedDate = datetime.toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    
+                    const formattedTime = datetime.toLocaleTimeString(undefined, {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const timeslotElement = document.createElement('div');
+                    timeslotElement.className = 'timeslot';
+                    timeslotElement.innerHTML = `
+                        <h3>${slot.location}</h3>
+                        <p><strong>Date:</strong> ${formattedDate}</p>
+                        <p><strong>Time:</strong> ${formattedTime}</p>
+                        <button class="book-btn" data-id="${slot.id}" data-location="${slot.location}" data-time="${slot.time}">Book Now</button>
+                    `;
+                    
+                    timeslotsContainer.appendChild(timeslotElement);
+                });
+                
+                // Add event listeners to booking buttons
+                document.querySelectorAll('.book-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const location = this.getAttribute('data-location');
+                        const time = this.getAttribute('data-time');
+                        
+                        openBookingModal(id, location, time);
+                    });
+                });
+            }
+            
+            // Function to filter timeslots based on selected filters
+            function filterTimeslots() {
+                const selectedLocation = locationFilter.value;
+                const selectedDate = dateFilter.value;
+                const selectedTime = timeFilter.value;
+                
+                let filteredTimeslots = allTimeslots;
+                
+                // Filter by location
+                if (selectedLocation !== 'all') {
+                    filteredTimeslots = filteredTimeslots.filter(slot => 
+                        slot.location === selectedLocation
+                    );
+                }
+                
+                // Filter by date
+                if (selectedDate !== 'all') {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    
+                    const nextWeek = new Date(today);
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    
+                    filteredTimeslots = filteredTimeslots.filter(slot => {
+                        const slotDate = new Date(slot.time);
+                        
+                        if (selectedDate === 'today') {
+                            return slotDate.toDateString() === today.toDateString();
+                        } else if (selectedDate === 'tomorrow') {
+                            return slotDate.toDateString() === tomorrow.toDateString();
+                        } else if (selectedDate === 'week') {
+                            return slotDate >= today && slotDate < nextWeek;
+                        }
+                        
+                        return true;
+                    });
+                }
+                
+                // Filter by time of day
+                if (selectedTime !== 'all') {
+                    filteredTimeslots = filteredTimeslots.filter(slot => {
+                        const slotDate = new Date(slot.time);
+                        const hours = slotDate.getHours();
+                        
+                        if (selectedTime === 'morning') {
+                            return hours >= 8 && hours < 12;
+                        } else if (selectedTime === 'afternoon') {
+                            return hours >= 12 && hours < 17;
+                        } else if (selectedTime === 'evening') {
+                            return hours >= 17;
+                        }
+                        
+                        return true;
+                    });
+                }
+                
+                displayTimeslots(filteredTimeslots);
+            }
+            
+            // Function to open the booking modal
+            function openBookingModal(id, location, time) {
+                const datetime = new Date(time);
+                const formattedDate = datetime.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const formattedTime = datetime.toLocaleTimeString(undefined, {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                document.querySelector('.modal-header h2').textContent = 
+                    `Complete Your Booking - ${location}`;
+                
+                const dateInfo = document.createElement('p');
+                dateInfo.innerHTML = `<strong>${formattedDate} at ${formattedTime}</strong>`;
+                
+                const existingDateInfo = document.querySelector('.modal-date-info');
+                if (existingDateInfo) {
+                    existingDateInfo.remove();
+                }
+                
+                dateInfo.className = 'modal-date-info';
+                document.querySelector('.modal-header').appendChild(dateInfo);
+                
+                timeslotIdInput.value = id;
+                timeslotLocationInput.value = location;
+                
+                bookingModal.style.display = 'flex';
+            }
+        });
+    </script>
 </body>
 </html>

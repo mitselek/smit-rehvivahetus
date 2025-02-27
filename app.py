@@ -18,7 +18,6 @@ def handle_xml_response(response, service):
     times = data.get('tireChangeTimesResponse', {}).get('availableTime', []) # changed from 'availableTimes'
     if isinstance(times, dict):
         times = [times]
-    print(f"Times from {service.name}: {data}")
     return [{'time': t['time'], 'id': t['uuid'], 'location': service.name} for t in times]
 
 def handle_json_list_response(times, service):
