@@ -112,6 +112,7 @@ function displayTimes(times) {
     times.forEach(time => {
         const timeCard = document.createElement('div')
         timeCard.className = 'time-card'
+        timeCard.dataset.id = time.id
         
         const timeDate = new Date(time.time)
         const formattedDate = timeDate.toLocaleDateString('en-US', {
@@ -216,6 +217,16 @@ async function submitBooking(event) {
         if (data.success) {
             closeModal()
             showSuccess(errorMessage, successMessage, `Booking confirmed! Your booking ID is ${data.booking_id}. ${data.message}`)
+            
+            // Fade out the reserved time slot
+            const reservedTimeSlot = document.querySelector(`.time-card[data-id="${data.booking_id}"]`)
+            if (reservedTimeSlot) {
+                reservedTimeSlot.classList.add('fade-out')
+                setTimeout(() => {
+                    reservedTimeSlot.remove()
+                }, 1000)
+            }
+            
             setTimeout(fetchTimes, FEEDBACK_DELAY) // Delay fetching times to allow feedback to be shown
         } else {
             showError(errorMessage, successMessage, data.message || data.error || 'Booking failed. Please try again.')

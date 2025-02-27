@@ -203,3 +203,8 @@ button:hover {
 .visible {
     display: flex !important;
 }
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
