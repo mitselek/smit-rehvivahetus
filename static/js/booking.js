@@ -223,10 +223,11 @@ async function submitBooking(event) {
             closeModal()
             showSuccess(errorMessage, successMessage, `Booking confirmed! Your booking ID is ${data.booking_id}. ${data.message}`)
             
-            // Fade out the reserved time slot
+            // Fade out the reserved time slot and scroll to the top of the page
             const reservedTimeSlot = document.querySelector(`.time-card[data-id="${data.booking_id}"]`)
             if (reservedTimeSlot) {
                 reservedTimeSlot.classList.add('fade-out')
+                window.scrollTo({ top: 0, behavior: 'smooth' })
                 setTimeout(() => {
                     reservedTimeSlot.remove()
                 }, 1000)
