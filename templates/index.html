@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Book your tire change service appointment online">
     <title>Tire Change Service Booking</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -11,72 +12,76 @@
         <h1>Tire Change Service Booking</h1>
     </header>
     
-    <div class="filters">
-        <div class="filter-group">
-            <label for="vehicle-type-filter">Vehicle Type:</label>
-            <select id="vehicle-type-filter" name="vehicleType">
-                <option value="all">All Vehicles</option>
-                <option value="Car">Car</option>
-                <option value="Truck">Truck</option>
-                <option value="SUV">SUV</option>
-            </select>
+    <main>
+        <section class="filters">
+            <div class="filter-group">
+                <label for="vehicle-type-filter">Vehicle Type:</label>
+                <select id="vehicle-type-filter" name="vehicleType">
+                    <option value="all">All Vehicles</option>
+                    <option value="Car">Car</option>
+                    <option value="Truck">Truck</option>
+                    <option value="SUV">SUV</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="location-filter">Location:</label>
+                <select id="location-filter" name="location">
+                    <option value="all">All Locations</option>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="date-range-filter">Date Range:</label>
+                <select id="date-range-filter" name="dateRange">
+                    <option value="today">Today</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="week" selected>Next 5 Days</option>
+                </select>
+            </div>
+        </section>
+        
+        <div aria-live="polite">
+            <div id="error-message" class="message error hidden" role="alert"></div>
+            <div id="success-message" class="message success hidden" role="alert"></div>
+            <div id="loading" class="loading hidden" aria-hidden="true">Loading available times...</div>
         </div>
         
-        <div class="filter-group">
-            <label for="location-filter">Location:</label>
-            <select id="location-filter" name="location">
-                <option value="all">All Locations</option>
-                <!-- Will be populated dynamically -->
-            </select>
-        </div>
-        
-        <div class="filter-group">
-            <label for="date-range-filter">Date Range:</label>
-            <select id="date-range-filter" name="dateRange">
-                <option value="today">Today</option>
-                <option value="tomorrow">Tomorrow</option>
-                <option value="week" selected>Next 5 Days</option>
-            </select>
-        </div>
-    </div>
+        <section id="results">
+            <h2>Available Appointments</h2>
+            <div id="times-container" class="times-container">
+                <!-- Time slots will be displayed here -->
+            </div>
+        </section>
+    </main>
     
-    <div id="error-message" class="error hidden"></div>
-    <div id="success-message" class="success hidden"></div>
-    <div id="loading" class="loading hidden">Loading available times...</div>
-    
-    <div id="results">
-        <h2>Available Appointments</h2>
-        <div id="times-container" class="times-container">
-            <!-- Time slots will be displayed here -->
-        </div>
-    </div>
-    
-    <!-- Booking Modal - fixed modal class and initial state -->
-    <div id="booking-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <h2>Book Appointment</h2>
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="modal-title">
+            <h2 id="modal-title">Book Appointment</h2>
             <form id="booking-form">
                 <input type="hidden" id="booking-timeslot-id" name="timeslotId">
                 <input type="hidden" id="booking-location" name="location">
                 
                 <div class="form-group">
                     <div class="field-label">Appointment Details</div>
-                    <div id="booking-appointment-details" role="region" aria-label="Appointment Details"></div>
+                    <div id="booking-appointment-details" aria-live="polite"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="booking-name">Full Name:</label>
-                    <input type="text" id="booking-name" name="name" required>
+                    <input type="text" id="booking-name" name="name" required autocomplete="name">
                 </div>
                 
                 <div class="form-group">
                     <label for="booking-email">Email Address:</label>
-                    <input type="email" id="booking-email" name="email" required>
+                    <input type="email" id="booking-email" name="email" required autocomplete="email">
                 </div>
                 
                 <div class="form-group">
                     <label for="booking-phone">Phone Number:</label>
-                    <input type="tel" id="booking-phone" name="phone" required>
+                    <input type="tel" id="booking-phone" name="phone" required autocomplete="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Format: 123-456-7890">
                 </div>
                 
                 <div class="form-group">
@@ -101,6 +106,10 @@
             </form>
         </div>
     </div>
+    
+    <footer>
+        <p>&copy; 2025 Tire Change Service. All rights reserved.</p>
+    </footer>
     
     <script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 </body>
