@@ -1,5 +1,5 @@
 import BookingApp from '../booking.js'
-import { mockDOM } from './setupTests.js'
+import { mockDOM, mockFetch } from './setupTests.js'
 
 describe('BookingApp Data Fetching', () => {
   let bookingApp
@@ -11,7 +11,7 @@ describe('BookingApp Data Fetching', () => {
     originalFetch = global.fetch
     
     // Mock fetch
-    fetchMock = jest.fn()
+    fetchMock = mockFetch()
     global.fetch = fetchMock
     
     // Use reusable mock DOM elements
@@ -43,10 +43,8 @@ describe('BookingApp Data Fetching', () => {
       }
     ]
 
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockData)
-    })
+    fetchMock = mockFetch(mockData)
+    global.fetch = fetchMock
 
     await bookingApp.fetchTimes()
     await Promise.resolve() // Wait for next tick
@@ -55,11 +53,8 @@ describe('BookingApp Data Fetching', () => {
   })
   
   test('fetchTimes should handle API errors', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error'
-    })
+    fetchMock = mockFetch([], false)
+    global.fetch = fetchMock
     
     await bookingApp.fetchTimes()
     await Promise.resolve() // Wait for next tick
@@ -69,7 +64,8 @@ describe('BookingApp Data Fetching', () => {
   })
   
   test('fetchTimes should handle network errors', async () => {
-    fetchMock.mockRejectedValueOnce(new Error('Network error'))
+    fetchMock = jest.fn(() => Promise.reject(new Error('Network error')))
+    global.fetch = fetchMock
     
     await bookingApp.fetchTimes()
     

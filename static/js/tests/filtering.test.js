@@ -1,5 +1,5 @@
 import BookingApp from '../booking.js'
-import { mockDOM } from './setupTests.js'
+import { mockDOM, mockFetch } from './setupTests.js'
 
 describe('BookingApp Filtering', () => {
   let bookingApp
@@ -11,12 +11,7 @@ describe('BookingApp Filtering', () => {
     originalFetch = global.fetch
 
     // Mock fetch
-    fetchMock = jest.fn(() => 
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([])
-      })
-    )
+    fetchMock = mockFetch()
     global.fetch = fetchMock
 
     // Use reusable mock DOM elements

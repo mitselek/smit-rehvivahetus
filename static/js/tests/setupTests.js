@@ -33,3 +33,20 @@ export const mockDOM = () => {
     <div id="booking-appointment-details"></div>
   `
 }
+
+export const mockFetch = (response = [], ok = true) => {
+  return jest.fn(() =>
+    Promise.resolve({
+      ok,
+      json: () => Promise.resolve(response)
+    })
+  )
+}
+
+export const setupTimersAndScroll = () => {
+  // Mock scrollTo
+  window.scrollTo = jest.fn()
+  
+  // Mock setTimeout
+  jest.useFakeTimers()
+}

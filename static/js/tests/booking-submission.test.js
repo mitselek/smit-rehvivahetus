@@ -1,6 +1,6 @@
 import 'whatwg-fetch' // Ensure fetch is available in the test environment
 import BookingApp from '../booking.js'
-import { mockDOM } from './setupTests.js'
+import { mockDOM, mockFetch } from './setupTests.js'
 
 describe('BookingApp Booking Submission', () => {
   let bookingApp
@@ -14,12 +14,8 @@ describe('BookingApp Booking Submission', () => {
     bookingApp = new BookingApp().init()
 
     // Mock fetch
-    fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ success: true, booking_id: '12345', message: 'Booking successful' })
-      })
-    )
+    fetchMock = mockFetch([{ success: true, booking_id: '12345', message: 'Booking successful' }])
+    global.fetch = fetchMock
   })
   
   afterEach(() => {
@@ -85,13 +81,8 @@ describe('BookingApp Booking Submission', () => {
     })
 
     // Mock server error
-    fetchMock.mockImplementationOnce(() => 
-      Promise.resolve({
-        ok: false,
-        status: 500,
-        json: () => Promise.resolve({ error: 'Server error' })
-      })
-    )
+    fetchMock = mockFetch([], false)
+    global.fetch = fetchMock
 
     // Submit form
     await bookingApp.submitBooking({ preventDefault: jest.fn() })
@@ -119,15 +110,8 @@ describe('BookingApp Booking Submission', () => {
     })
     
     // Mock error response
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({
-          success: false,
-          error: 'Time slot no longer available'
-        })
-      })
-    )
+    fetchMock = mockFetch([{ success: false, error: 'Time slot no longer available' }])
+    global.fetch = fetchMock
 
     // Submit form and wait for all promises
     await bookingApp.submitBooking({ preventDefault: jest.fn() })

@@ -1,5 +1,5 @@
 import BookingApp, { CONFIG } from '../booking.js'
-import { mockDOM } from './setupTests.js'
+import { mockDOM, mockFetch, setupTimersAndScroll } from './setupTests.js'
 
 describe('BookingApp Initialization and Utility Methods', () => {
   let bookingApp
@@ -11,12 +11,7 @@ describe('BookingApp Initialization and Utility Methods', () => {
     originalFetch = global.fetch
     
     // Mock fetch for initial fetchTimes call
-    fetchMock = jest.fn(() => 
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([])
-      })
-    )
+    fetchMock = mockFetch()
     global.fetch = fetchMock
     
     // Use reusable mock DOM elements
@@ -25,11 +20,8 @@ describe('BookingApp Initialization and Utility Methods', () => {
     // Initialize BookingApp and call init() explicitly
     bookingApp = new BookingApp().init()
     
-    // Mock scrollTo
-    window.scrollTo = jest.fn()
-    
-    // Mock setTimeout
-    jest.useFakeTimers()
+    // Setup timers and scroll
+    setupTimersAndScroll()
   })
   
   afterEach(() => {
