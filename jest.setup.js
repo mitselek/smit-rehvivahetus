@@ -19,3 +19,6 @@ global.FormData = class FormData {
         Object.entries(this.data).forEach(([key, value]) => callback(value, key))
     }
 }
+
+// Example setup file
+// You can add any global setup code here

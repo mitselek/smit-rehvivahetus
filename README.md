@@ -64,6 +64,16 @@ You can test the APIs directly using the `api.http` file:
 
 ### Frontend Tests
 
+**Structure**
+- Initialization and Utility Methods: Tests related to initialization and utility methods.
+- Form Validation: Tests related to form validation.
+- Data Fetching: Tests related to fetching data from the API.
+- Displaying Times: Tests related to displaying time slots.
+- Filtering: Tests related to filtering time slots.
+- Modal Functionality: Tests related to the booking modal.
+- Booking Submission: Tests related to submitting bookings.
+- Integration Tests: Comprehensive tests that cover multiple functionalities.
+
 Run tests once:
 ```bash
 npm test
