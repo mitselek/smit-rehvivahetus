@@ -130,11 +130,11 @@ def book_v1_timeslot(service, booking_data, timeslot_id):
 """
     
     headers = {
-        'Content-Type': 'text/xml',
+        'Content-Type': 'text/xml; charset=utf-8',  # Ensure UTF-8 encoding
         'Accept': 'text/xml'
     }
     print(f"Booking timeslot {timeslot_id} at {service.name}, url: {url}, xml: {xml_data}")
-    response = requests.put(url, data=xml_data, headers=headers)
+    response = requests.put(url, data=xml_data.encode('utf-8'), headers=headers)  # Encode XML data in UTF-8
     
     if response.status_code != 200:
         raise Exception(f"Booking failed: {response.text}")
