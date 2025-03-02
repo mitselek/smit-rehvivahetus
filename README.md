@@ -58,7 +58,9 @@ pip install -r requirements.txt
 
 The application expects the following services to be running:
 - London API at http://localhost:9003
+  - docker run -d -p 9003:80 surmus/london-tire-workshop:2.0.1
 - Manchester API at http://localhost:9004
+  - docker run -d -p 9004:80 surmus/manchester-tire-workshop:2.0.1
 
 To add a new API:
 1. Create a new JSON file in the `services` folder named `{service_name}_doc.json`

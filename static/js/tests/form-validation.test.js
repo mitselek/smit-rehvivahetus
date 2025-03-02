@@ -20,6 +20,21 @@ describe('BookingApp Form Validation', () => {
           <option value="Premium">Premium Tire Change</option>
           <option value="Emergency">Emergency Tire Service</option>
         </select>
+        <select id="vehicle-type-filter" name="vehicleType">
+          <option value="all">All Vehicle Types</option>
+          <option value="Car">Car</option>
+          <option value="SUV">SUV</option>
+          <option value="Truck">Truck</option>
+        </select>
+        <select id="location-filter">
+          <option value="all">All Locations</option>
+        </select>
+        <select id="date-range-filter">
+          <option value="today">Today</option>
+          <option value="tomorrow">Tomorrow</option>
+          <option value="week">Next 7 Days</option>
+        </select>
+        <div id="times-container"></div>
       </form>
       <div id="loading" class="hidden"></div>
       <div id="error-message" class="hidden"></div>
