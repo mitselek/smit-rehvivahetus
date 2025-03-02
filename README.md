@@ -7,6 +7,8 @@ A web application for browsing available tire change time slots from multiple wo
 ### Prerequisites
 - Python 3.8 or higher
 - pip (Python package installer)
+- Node.js 16 or higher (for running tests)
+- npm (Node.js package manager)
 
 ### Installation
 
@@ -17,11 +19,15 @@ chmod +x setup.sh
 
 # Run setup script
 ./setup.sh
+
+# Install Node.js dependencies
+npm install
 ```
 
 #### On Windows:
 ```batch
 setup.bat
+npm install
 ```
 
 ### Running the Application
@@ -43,7 +49,77 @@ The application expects the following services to be running:
 - London API at http://localhost:9003
 - Manchester API at http://localhost:9004
 
-To add a new API, create *service_name*_doc.json file in services folder.
+To add a new API:
+1. Create a new JSON file in the `services` folder named `{service_name}_doc.json`
+2. Add service configuration to `services/service_info.yaml`
+3. Update the tests if necessary
+
+### API Testing
+You can test the APIs directly using the `api.http` file:
+1. Install REST Client extension for VS Code
+2. Open `api.http`
+3. Click "Send Request" above each request
+
+## Tests
+
+### Frontend Tests
+
+Run tests once:
+```bash
+npm test
+```
+
+Run tests in watch mode:
+```bash
+npm run test:watch
+```
+
+Testing commands:
+- Press `a` to run all tests
+- Press `f` to run only failed tests
+- Press `o` to run only modified files
+- Press `q` to quit watch mode
+
+View test coverage:
+```bash
+npm test -- --coverage
+```
+
+### Backend Tests
+
+Run Python tests:
+```bash
+# Activate virtual environment first
+python -m pytest
+
+# With coverage
+python -m pytest --cov=.
+
+# Generate coverage report
+python -m pytest --cov=. --cov-report=html
+```
+
+## Project Structure
+
+```
+smit-rehvivahetus/
+├── app.py              # Main Flask application
+├── static/
+│   ├── css/           # Stylesheets
+│   └── js/            # JavaScript files
+├── templates/         # HTML templates
+├── services/         # API service configurations
+├── tests/           # Test files
+└── venv/            # Python virtual environment
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## License
 
