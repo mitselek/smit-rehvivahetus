@@ -22,12 +22,23 @@ chmod +x setup.sh
 
 # Install Node.js dependencies
 npm install
+
+# Upgrade setuptools and wheel
+pip install --upgrade setuptools wheel
+
+# Install Python dependencies
+pip install -r requirements.txt
 ```
 
 #### On Windows:
 ```batch
 setup.bat
 npm install
+
+# Upgrade setuptools and wheel
+pip install --upgrade setuptools wheel
+
+pip install -r requirements.txt
 ```
 
 ### Running the Application
