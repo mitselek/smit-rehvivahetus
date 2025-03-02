@@ -1,7 +1,7 @@
 // Mock window.scrollTo
 window.scrollTo = jest.fn()
 
-// Mock FormData
+// Mock FormData with all required methods
 global.FormData = class FormData {
     constructor(form) {
         this.data = {}
@@ -13,6 +13,10 @@ global.FormData = class FormData {
     
     get(key) {
         return this.data[key]
+    }
+    
+    set(key, value) {
+        this.data[key] = value
     }
     
     forEach(callback) {

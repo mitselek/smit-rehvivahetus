@@ -1,4 +1,4 @@
-import BookingApp from '../booking.js'
+import BookingApp, { CONFIG } from '../booking.js'
 
 describe('BookingApp Initialization and Utility Methods', () => {
   let bookingApp
@@ -9,26 +9,26 @@ describe('BookingApp Initialization and Utility Methods', () => {
     // Save original fetch
     originalFetch = global.fetch
     
-    // Mock fetch
-    fetchMock = jest.fn()
+    // Mock fetch for initial fetchTimes call
+    fetchMock = jest.fn(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      })
+    )
     global.fetch = fetchMock
     
-    // Create mock DOM elements
+    // Create complete mock DOM with all required elements
     document.body.innerHTML = `
       <div id="booking-modal" class="hidden"></div>
       <select id="vehicle-type-filter">
         <option value="all">All Vehicle Types</option>
-        <option value="Car">Car</option>
-        <option value="SUV">SUV</option>
-        <option value="Truck">Truck</option>
       </select>
       <select id="location-filter">
         <option value="all">All Locations</option>
       </select>
       <select id="date-range-filter">
         <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="week">Next 7 Days</option>
       </select>
       <div id="times-container"></div>
       <div id="loading" class="hidden"></div>
@@ -53,8 +53,8 @@ describe('BookingApp Initialization and Utility Methods', () => {
       <div id="booking-appointment-details"></div>
     `
     
-    // Initialize BookingApp
-    bookingApp = new BookingApp()
+    // Initialize BookingApp and call init() explicitly
+    bookingApp = new BookingApp().init()
     
     // Mock scrollTo
     window.scrollTo = jest.fn()
@@ -127,28 +127,34 @@ describe('BookingApp Initialization and Utility Methods', () => {
     })
     
     test('formatDateTime should format dates correctly', () => {
-      const testDate = '2025-03-15T14:30:00Z'
+      // Create a fixed date using Date constructor
+      const testDate = new Date(2025, 2, 15, 14, 30) // March 15, 2025, 14:30
+      
       const fullFormat = bookingApp.formatDateTime(testDate, CONFIG.DATE_FORMAT.full)
       const timeFormat = bookingApp.formatDateTime(testDate, CONFIG.DATE_FORMAT.time)
       
+      // Test full format (month and year should always be present)
       expect(fullFormat).toContain('March')
-      expect(fullFormat).toContain('15')
       expect(fullFormat).toContain('2025')
+      expect(fullFormat).toContain('15')
       
-      // The exact time format will depend on the timezone where the test runs
+      // Test time format (only check for hours and minutes format)
       expect(timeFormat).toMatch(/\d{1,2}:\d{2}/)
     })
-    
+
     test('formatDateTime should handle invalid dates', () => {
-      const result = bookingApp.formatDateTime('invalid-date', CONFIG.DATE_FORMAT.full)
-      expect(result).toBe('Invalid date')
+      // Test with explicitly invalid inputs
+      expect(bookingApp.formatDateTime(null, CONFIG.DATE_FORMAT.full)).toBe('Invalid date')
+      expect(bookingApp.formatDateTime('', CONFIG.DATE_FORMAT.full)).toBe('Invalid date')
+      expect(bookingApp.formatDateTime('not-a-date', CONFIG.DATE_FORMAT.full)).toBe('Invalid date')
     })
     
-    test('getVehicleIcon should return correct icon', () => {
-      expect(bookingApp.getVehicleIcon(['Truck', 'Car'])).toBe('🚚')
-      expect(bookingApp.getVehicleIcon(['SUV'])).toBe('🚙')
-      expect(bookingApp.getVehicleIcon(['Car'])).toBe('🚗')
-      expect(bookingApp.getVehicleIcon(['Car', 'SUV'])).toBe('🚙')
+    test('getVehicleIcon should return correct icons', () => {
+      // Test each icon type individually to avoid string comparison issues
+      expect(bookingApp.getVehicleIcon(['Truck', 'Car'])).toBe(CONFIG.VEHICLE_ICONS.Truck)
+      expect(bookingApp.getVehicleIcon(['SUV'])).toBe(CONFIG.VEHICLE_ICONS.SUV)
+      expect(bookingApp.getVehicleIcon(['Car'])).toBe(CONFIG.VEHICLE_ICONS.Car)
+      expect(bookingApp.getVehicleIcon(['Car', 'SUV'])).toBe(CONFIG.VEHICLE_ICONS.SUV)
     })
     
     test('isDateInRange should filter dates correctly', () => {

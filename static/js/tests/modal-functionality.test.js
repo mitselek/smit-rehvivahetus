@@ -2,11 +2,34 @@ import BookingApp from '../booking.js'
 
 describe('BookingApp Modal Functionality', () => {
   let bookingApp
+  let fetchMock
 
   beforeEach(() => {
-    // Create mock DOM elements
+    // Mock fetch
+    fetchMock = jest.fn(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      })
+    )
+    global.fetch = fetchMock
+
+    // Create mock DOM elements with all required elements
     document.body.innerHTML = `
       <div id="booking-modal" class="hidden"></div>
+      <select id="vehicle-type-filter">
+        <option value="all">All Vehicle Types</option>
+      </select>
+      <select id="location-filter">
+        <option value="all">All Locations</option>
+      </select>
+      <select id="date-range-filter">
+        <option value="today">Today</option>
+      </select>
+      <div id="times-container"></div>
+      <div id="loading" class="hidden"></div>
+      <div id="error-message" class="hidden"></div>
+      <div id="success-message" class="hidden"></div>
       <form id="booking-form">
         <input id="booking-timeslot-id" name="timeslotId">
         <input id="booking-location" name="location">
@@ -26,12 +49,20 @@ describe('BookingApp Modal Functionality', () => {
       <div id="booking-appointment-details"></div>
     `
     
-    // Initialize BookingApp
+    // Initialize BookingApp and call init explicitly
     bookingApp = new BookingApp()
+    bookingApp.init()
+
+    // Mock scrollTo
+    window.scrollTo = jest.fn()
+    
+    // Mock setTimeout
+    jest.useFakeTimers()
   })
   
   afterEach(() => {
     document.body.innerHTML = ''
+    jest.resetAllMocks()
   })
 
   test('openBookingModal should populate form fields and show modal', () => {

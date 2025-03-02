@@ -4,8 +4,9 @@ describe('BookingApp Form Validation', () => {
   let bookingApp
 
   beforeEach(() => {
-    // Create mock DOM elements
+    // Create mock DOM elements with ALL required elements
     document.body.innerHTML = `
+      <div id="booking-modal" class="hidden"></div>
       <form id="booking-form">
         <input id="booking-timeslot-id" name="timeslotId">
         <input id="booking-location" name="location">
@@ -19,12 +20,16 @@ describe('BookingApp Form Validation', () => {
           <option value="Premium">Premium Tire Change</option>
           <option value="Emergency">Emergency Tire Service</option>
         </select>
-        <button type="submit">Book</button>
       </form>
+      <div id="loading" class="hidden"></div>
+      <div id="error-message" class="hidden"></div>
+      <div id="success-message" class="hidden"></div>
+      <button id="close-modal"></button>
+      <div id="booking-appointment-details"></div>
     `
     
     // Initialize BookingApp
-    bookingApp = new BookingApp()
+    bookingApp = new BookingApp().init()
   })
   
   afterEach(() => {
@@ -32,18 +37,16 @@ describe('BookingApp Form Validation', () => {
   })
 
   test('validateForm should validate name field', () => {
-    const formData = new FormData()
-    formData.append('email', 'test@example.com')
-    formData.append('vehicle', 'Toyota Corolla')
-    formData.append('serviceType', 'maintenance')
+    const formData = new FormData(bookingApp.elements.bookingForm)
     
     // Empty name
+    formData.set('name', '')
     let validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
     expect(validation.message).toContain('Please enter your name')
     
     // Short name
-    formData.append('name', 'A')
+    formData.set('name', 'A')
     validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
     expect(validation.message).toContain('Name must be at least 2 characters')
@@ -55,21 +58,19 @@ describe('BookingApp Form Validation', () => {
   })
   
   test('validateForm should validate email field', () => {
-    const formData = new FormData()
-    formData.append('name', 'John Doe')
-    formData.append('vehicle', 'Toyota Corolla')
-    formData.append('serviceType', 'maintenance')
+    const formData = new FormData(bookingApp.elements.bookingForm)
     
     // Empty email
+    formData.set('email', '')
     let validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
     expect(validation.message).toContain('Please enter your email')
     
     // Invalid email
-    formData.append('email', 'invalid-email')
+    formData.set('email', 'invalid-email')
     validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
-    expect(validation.message).toContain('valid email')
+    expect(validation.message).toContain('Please enter a valid email address')
     
     // Valid email
     formData.set('email', 'john@example.com')
@@ -78,21 +79,17 @@ describe('BookingApp Form Validation', () => {
   })
   
   test('validateForm should validate phone field if provided', () => {
-    const formData = new FormData()
-    formData.append('name', 'John Doe')
-    formData.append('email', 'john@example.com')
-    formData.append('vehicle', 'Toyota Corolla')
-    formData.append('serviceType', 'maintenance')
+    const formData = new FormData(bookingApp.elements.bookingForm)
     
     // Empty phone (optional)
     let validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(true)
     
     // Invalid phone
-    formData.append('phone', 'invalid-phone')
+    formData.set('phone', 'invalid-phone')
     validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
-    expect(validation.message).toContain('valid phone')
+    expect(validation.message).toContain('Please enter a valid phone number')
     
     // Valid phone formats
     formData.set('phone', '123-456-7890')
@@ -105,35 +102,31 @@ describe('BookingApp Form Validation', () => {
   })
   
   test('validateForm should validate vehicle field', () => {
-    const formData = new FormData()
-    formData.append('name', 'John Doe')
-    formData.append('email', 'john@example.com')
-    formData.append('serviceType', 'maintenance')
+    const formData = new FormData(bookingApp.elements.bookingForm)
     
     // Empty vehicle
+    formData.set('vehicle', '')
     let validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
-    expect(validation.message).toContain('vehicle details')
+    expect(validation.message).toContain('Please enter your vehicle details')
     
     // Valid vehicle
-    formData.append('vehicle', 'Toyota Corolla')
+    formData.set('vehicle', 'Toyota Corolla')
     validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(true)
   })
   
   test('validateForm should validate serviceType field', () => {
-    const formData = new FormData()
-    formData.append('name', 'John Doe')
-    formData.append('email', 'john@example.com')
-    formData.append('vehicle', 'Toyota Corolla')
+    const formData = new FormData(bookingApp.elements.bookingForm)
     
-    // Empty service type
+    // Empty serviceType
+    formData.set('serviceType', '')
     let validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(false)
-    expect(validation.message).toContain('service type')
+    expect(validation.message).toContain('Please select a service type')
     
-    // Valid service type
-    formData.append('serviceType', 'maintenance')
+    // Valid serviceType
+    formData.set('serviceType', 'Regular')
     validation = bookingApp.validateForm(formData)
     expect(validation.valid).toBe(true)
   })
