@@ -1,3 +1,5 @@
+import BookingApp from '../booking.js'
+
 describe('BookingApp Initialization and Utility Methods', () => {
   let bookingApp
   let fetchMock

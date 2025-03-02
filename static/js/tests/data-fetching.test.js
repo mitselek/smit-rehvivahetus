@@ -1,3 +1,5 @@
+import BookingApp from '../booking.js'
+
 describe('BookingApp Data Fetching', () => {
   let bookingApp
   let fetchMock
