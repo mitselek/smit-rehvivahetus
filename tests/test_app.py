@@ -165,7 +165,7 @@ def test_book_appointment(client, requests_mock):
         'vehicle': 'Toyota Corolla',
         'serviceType': 'Regular'
     }
-    requests_mock.put('http://localhost:9003/tire-change-times/1/booking', text='<response><status>confirmed</status></response>')
+    requests_mock.put('http://localhost:9003/api/v1/tire-change-times/1/booking', text='<response><status>confirmed</status></response>')
     
     response = client.post('/api/book', json=booking_data)
     assert response.status_code == 200
