@@ -201,3 +201,34 @@ def test_book_appointment_invalid_location(client):
     result = response.get_json()
     assert result['success'] == False
     assert 'Invalid location' in result['error']
+
+def test_get_service_times_error_handling(requests_mock):
+    service = MockService(
+        name='London',
+        base_url='http://localhost:9003',
+        available_times_path='/api/v1/tire-change-times/available',
+        content_type='text/xml'
+    )
+    today = datetime.now().strftime('%Y-%m-%d')
+    future = (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+    requests_mock.get(f'http://localhost:9003/api/v1/tire-change-times/available?from={today}&until={future}', status_code=500)
+    times = get_service_times(service)
+    assert len(times) == 0
+
+def test_book_appointment_server_error(client, requests_mock):
+    booking_data = {
+        'timeslotId': '1',
+        'location': 'London',
+        'name': 'John Doe',
+        'email': 'john@example.com',
+        'phone': '+37256560978',
+        'vehicle': 'Toyota Corolla',
+        'serviceType': 'Regular'
+    }
+    requests_mock.put('http://localhost:9003/api/v1/tire-change-times/1/booking', status_code=500, text='Server error')
+    
+    response = client.post('/api/book', json=booking_data)
+    assert response.status_code == 500
+    result = response.get_json()
+    assert result['success'] == False
+    assert 'Failed to process booking' in result['error']
