@@ -338,7 +338,7 @@ class BookingApp {
       const response = await fetch('/api/book', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json; charset=utf-8' // Ensure UTF-8 encoding
         },
         body: JSON.stringify(bookingData)
       })
@@ -387,6 +387,7 @@ class BookingApp {
     const name = getValue('name')
     const email = getValue('email')
     const phone = getValue('phone')
+    const serviceType = getValue('serviceType')
 
     if (name && name.length < 2) {
       errors.push('Name must be at least 2 characters')
@@ -398,6 +399,10 @@ class BookingApp {
 
     if (phone && !/^\+?[\d\s-]{7,}$/.test(phone)) {
       errors.push('Please enter a valid phone number')
+    }
+
+    if (serviceType === '') {
+      errors.push('Please select a service type')
     }
 
     return {

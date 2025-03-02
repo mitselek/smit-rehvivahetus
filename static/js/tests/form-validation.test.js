@@ -1,47 +1,12 @@
 import BookingApp from '../booking.js'
+import { mockDOM } from './setupTests.js'
 
 describe('BookingApp Form Validation', () => {
   let bookingApp
 
   beforeEach(() => {
-    // Create mock DOM elements with ALL required elements
-    document.body.innerHTML = `
-      <div id="booking-modal" class="hidden"></div>
-      <form id="booking-form">
-        <input id="booking-timeslot-id" name="timeslotId">
-        <input id="booking-location" name="location">
-        <input id="booking-name" name="name">
-        <input id="booking-email" name="email">
-        <input id="booking-phone" name="phone">
-        <input id="booking-vehicle" name="vehicle">
-        <select id="booking-service-type" name="serviceType">
-          <option value="">Select a service</option>
-          <option value="Regular">Regular Tire Change</option>
-          <option value="Premium">Premium Tire Change</option>
-          <option value="Emergency">Emergency Tire Service</option>
-        </select>
-        <select id="vehicle-type-filter" name="vehicleType">
-          <option value="all">All Vehicle Types</option>
-          <option value="Car">Car</option>
-          <option value="SUV">SUV</option>
-          <option value="Truck">Truck</option>
-        </select>
-        <select id="location-filter">
-          <option value="all">All Locations</option>
-        </select>
-        <select id="date-range-filter">
-          <option value="today">Today</option>
-          <option value="tomorrow">Tomorrow</option>
-          <option value="week">Next 7 Days</option>
-        </select>
-        <div id="times-container"></div>
-      </form>
-      <div id="loading" class="hidden"></div>
-      <div id="error-message" class="hidden"></div>
-      <div id="success-message" class="hidden"></div>
-      <button id="close-modal"></button>
-      <div id="booking-appointment-details"></div>
-    `
+    // Use reusable mock DOM elements
+    mockDOM()
     
     // Initialize BookingApp
     bookingApp = new BookingApp().init()

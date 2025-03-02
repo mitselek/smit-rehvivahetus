@@ -1,107 +1,50 @@
+import 'whatwg-fetch' // Ensure fetch is available in the test environment
 import BookingApp from '../booking.js'
+import { mockDOM } from './setupTests.js'
 
 describe('BookingApp Booking Submission', () => {
   let bookingApp
   let fetchMock
-  let originalFetch
 
-  beforeEach(async () => {
-    // Save original fetch
-    originalFetch = global.fetch
+  beforeEach(() => {
+    // Use reusable mock DOM elements
+    mockDOM()
     
-    // Create fresh fetch mock for each test
-    fetchMock = jest.fn()
-    global.fetch = fetchMock
-
-    // Initial fetchTimes response
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve([])
-    })
-    
-    // Create mock DOM elements with ALL required elements
-    document.body.innerHTML = `
-      <div id="booking-modal" class="hidden"></div>
-      <select id="vehicle-type-filter">
-        <option value="all">All Vehicle Types</option>
-      </select>
-      <select id="location-filter">
-        <option value="all">All Locations</option>
-      </select>
-      <select id="date-range-filter">
-        <option value="today">Today</option>
-      </select>
-      <div id="times-container"></div>
-      <div id="loading" class="hidden"></div>
-      <div id="error-message" class="hidden"></div>
-      <div id="success-message" class="hidden"></div>
-      <form id="booking-form">
-        <input id="booking-timeslot-id" name="timeslotId">
-        <input id="booking-location" name="location">
-        <input id="booking-name" name="name">
-        <input id="booking-email" name="email">
-        <input id="booking-phone" name="phone">
-        <input id="booking-vehicle" name="vehicle">
-        <select id="booking-service-type" name="serviceType">
-          <option value="">Select a service</option>
-          <option value="Regular">Regular Tire Change</option>
-          <option value="Premium">Premium Tire Change</option>
-          <option value="Emergency">Emergency Tire Service</option>
-        </select>
-        <button type="submit">Book</button>
-      </form>
-      <button id="close-modal"></button>
-      <div id="booking-appointment-details"></div>
-    `
-    
-    // Initialize BookingApp and wait for initial fetchTimes to complete
+    // Initialize BookingApp
     bookingApp = new BookingApp().init()
-    await new Promise(resolve => setTimeout(resolve, 0))
-    
-    // Reset fetch mock after initialization
-    fetchMock.mockReset()
+
+    // Mock fetch
+    fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true, booking_id: '12345', message: 'Booking successful' })
+      })
+    )
   })
   
   afterEach(() => {
     document.body.innerHTML = ''
-    global.fetch = originalFetch
-    jest.useRealTimers()
+    fetchMock.mockRestore()
   })
 
   test('submitBooking should validate form and submit valid data', async () => {
-    // Fill form with valid data
-    const formInputs = {
-      'timeslotId': '123',
-      'location': 'Downtown',
-      'name': 'John Doe',
-      'email': 'john@example.com',
-      'phone': '123-456-7890',
-      'vehicle': 'Toyota Corolla',
-      'serviceType': 'Regular'
-    }
+    const formData = new FormData(bookingApp.elements.bookingForm)
+    formData.set('timeslotId', '1')
+    formData.set('location', 'London')
+    formData.set('name', 'John Doe')
+    formData.set('email', 'john@example.com')
+    formData.set('phone', '123-456-7890')
+    formData.set('vehicle', 'Toyota Corolla')
+    formData.set('serviceType', 'Regular')
 
-    // Set form values
-    Object.entries(formInputs).forEach(([name, value]) => {
-      const input = bookingApp.elements.bookingForm.querySelector(`[name="${name}"]`)
-      if (input) input.value = value
-    })
+    // Mock form submission event
+    const submitEvent = new Event('submit')
+    jest.spyOn(submitEvent, 'preventDefault')
+    bookingApp.elements.bookingForm.dispatchEvent(submitEvent)
 
-    // Mock successful booking response
-    fetchMock.mockImplementationOnce(() => 
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          booking_id: '123',
-          message: 'Booking confirmed.'
-        })
-      })
-    )
+    // Wait for async operations to complete
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
-    // Submit form
-    const submitEvent = { preventDefault: jest.fn() }
-    await bookingApp.submitBooking(submitEvent)
-    
     // Verify submission
     expect(submitEvent.preventDefault).toHaveBeenCalled()
     expect(fetchMock).toHaveBeenCalledWith('/api/book', expect.objectContaining({
