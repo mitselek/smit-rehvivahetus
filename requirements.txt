@@ -1,7 +1,9 @@
-flask==3.0.0
-requests==2.31.0
-python-dateutil==2.8.2
-xmltodict==0.13.0
-PyYAML==6.0.1
-pytest==7.4.3
+Flask==2.0.1
+requests==2.25.1
+python-dateutil==2.8.1
+xmltodict==0.12.0
+PyYAML==5.4.1
+pytest==6.2.4
 pytest-cov==4.1.0  # for coverage reporting
+requests-mock==1.9.3
+werkzeug==2.0.1  # Compatible version with Flask 2.0.1

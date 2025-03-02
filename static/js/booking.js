@@ -17,7 +17,7 @@ const CONFIG = {
     },
     VEHICLE_ICONS: {
       'Truck': '🚚',
-      'SUV': '🚙',
+      'SUV': '🚙', // I know, this is a scam. noone has suv's today.
       'Car': '🚗'
     }
   }
