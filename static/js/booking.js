@@ -24,7 +24,8 @@ class BookingApp {
   constructor() {
     this.allTimes = []
     this.elements = {}
-    this.apiHost = (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') ? 'http://localhost:5000' : ''
+    this.env = (typeof process !== 'undefined' && process.env.NODE_ENV) ? process.env.NODE_ENV : 'development'
+    this.apiHost = (this.env === 'test') ? 'http://localhost:5001' : ''
   }
 
   init() {
@@ -43,7 +44,7 @@ class BookingApp {
     this.bindEvents()
     
     // Initial data load
-    this.fetchTimes()
+    // this.fetchTimes()
   }
 
   cacheElements() {
@@ -79,16 +80,25 @@ class BookingApp {
   }
 
   async fetchTimes() {
+    console.time('Fetch times')
     this.showLoading(true)
     try {
       const url = `${this.apiHost}/api/times`
-      console.log('Fetching times from:', url)
+      if (this.env === 'test') {
+        console.log('Fetching times from:', url)
+      }
       const response = await fetch(url)
       if (!response || !response.ok) {
         throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
       }
+      console.time('Fetch times')
+      console.log('got response')
       const data = await response.json()
+      console.time('Fetch times')
+      console.log('Fetched times:', data.length)
       this.allTimes = data
+      // if (this.env === 'test') {
+      // }
       this.updateLocationFilter(data)
       this.filterTimes()
     } catch (error) {
@@ -448,6 +458,7 @@ if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
     const app = new BookingApp().init()
+    app.fetchTimes()
     // Refresh every minute
     setInterval(() => app.fetchTimes(), 60000)
   })
