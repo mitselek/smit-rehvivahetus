@@ -1,5 +1,6 @@
+import 'whatwg-fetch' // Ensure fetch is available in the test environment
 import BookingApp from '../booking.js'
-import { mockDOM } from './setupTests.js'
+import { mockDOM, fillFormData } from './setupTests.js'
 
 describe('BookingApp Form Validation', () => {
   let bookingApp
@@ -7,7 +8,7 @@ describe('BookingApp Form Validation', () => {
   beforeEach(() => {
     // Use reusable mock DOM elements
     mockDOM()
-    
+
     // Initialize BookingApp
     bookingApp = new BookingApp().init()
   })
@@ -18,6 +19,7 @@ describe('BookingApp Form Validation', () => {
 
   test('validateForm should validate name field', () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
     
     // Empty name
     formData.set('name', '')
@@ -39,6 +41,7 @@ describe('BookingApp Form Validation', () => {
   
   test('validateForm should validate email field', () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
     
     // Empty email
     formData.set('email', '')
@@ -60,6 +63,7 @@ describe('BookingApp Form Validation', () => {
   
   test('validateForm should validate phone field if provided', () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
     
     // Empty phone (optional)
     let validation = bookingApp.validateForm(formData)
@@ -83,6 +87,7 @@ describe('BookingApp Form Validation', () => {
   
   test('validateForm should validate vehicle field', () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
     
     // Empty vehicle
     formData.set('vehicle', '')
@@ -98,6 +103,7 @@ describe('BookingApp Form Validation', () => {
   
   test('validateForm should validate serviceType field', () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
     
     // Empty serviceType
     formData.set('serviceType', '')
