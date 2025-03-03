@@ -82,6 +82,7 @@ class BookingApp {
     this.showLoading(true)
     try {
       const url = `${this.apiHost}/api/times`
+      console.log('Fetching times from:', url)
       const response = await fetch(url)
       if (!response || !response.ok) {
         throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
