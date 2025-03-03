@@ -7,16 +7,30 @@ describe('BookingApp Data Fetching', () => {
   let server
 
   beforeAll(async () => {
-    // Ensure server is started before tests
-    jest.setTimeout(1000) // Increase timeout for server start
-    // server = require('./testServer')
-    // Wait for server to be ready
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    console.log('Test server started')
+    jest.setTimeout(10000)
+    server = require('./testServer')
+    
+    await new Promise((resolve, reject) => {
+      const checkServer = () => {
+        fetch(`${testApiHost}/api/times`)
+          .then(res => res.ok ? resolve() : setTimeout(checkServer, 100))
+          .catch(() => setTimeout(checkServer, 100))
+      }
+      checkServer()
+    })
+    console.log('Test server ready at:', testApiHost)
   })
 
-  afterAll(done => {
-    // server.close(done)
+  // Change to async/await instead of done callback
+  afterAll(async () => {
+    if (server) {
+      await new Promise((resolve) => {
+        server.close(() => {
+          console.log('Test server closed')
+          resolve()
+        })
+      })
+    }
   })
 
   beforeEach(() => {

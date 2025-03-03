@@ -18,9 +18,9 @@ app.use('/api', logRequest)
 const apiProxy = createProxyMiddleware({
   target: 'http://localhost:5000',
   changeOrigin: true,
-  pathRewrite: Object.assign({}, {
+  pathRewrite: {
     '^/api': '/api'
-  }),
+  },
   logLevel: 'error',
   // Add onProxyReq handler to log proxy details
   onProxyReq: (proxyReq, req, res) => {
@@ -32,32 +32,22 @@ const apiProxy = createProxyMiddleware({
   },
 
   onProxyRes: (proxyRes, req, res) => {
-    const originalSend = res.send
-    let body = ''
-
-    proxyRes.on('data', (chunk) => {
-      body += chunk
-    })
-
+    // Simple logging without modifying the response stream
     proxyRes.on('end', () => {
-      try {
-        const parsedBody = JSON.parse(body)
-        console.log('<- Response payload:', {
-          path: req.originalUrl,
-          statusCode: proxyRes.statusCode,
-          body: parsedBody
-        })
-      } catch (e) {
-        console.log('<- Raw response:', body)
-      }
+      console.log('<- Response completed:', {
+        path: req.originalUrl,
+        statusCode: proxyRes.statusCode
+      })
     })
   },
   onError: (err, req, res) => {
     console.error('Proxy Error:', err)
-    res.writeHead(500, {
-      'Content-Type': 'application/json'
-    })
-    res.end(JSON.stringify({ error: 'Proxy Error' }))
+    if (!res.headersSent) {
+      res.writeHead(500, {
+        'Content-Type': 'application/json'
+      })
+      res.end(JSON.stringify({ error: 'Proxy Error' }))
+    }
   }
 })
 
