@@ -1,6 +1,6 @@
 import 'whatwg-fetch' // Ensure fetch is available in the test environment
 import BookingApp from '../booking.js'
-import { mockDOM, mockFetch } from './setupTests.js'
+import { mockDOM, mockFetch, fillFormData } from './setupTests.js'
 
 describe('BookingApp Booking Submission', () => {
   let bookingApp
@@ -25,13 +25,7 @@ describe('BookingApp Booking Submission', () => {
 
   test('submitBooking should validate form and submit valid data', async () => {
     const formData = new FormData(bookingApp.elements.bookingForm)
-    formData.set('timeslotId', '1')
-    formData.set('location', 'London')
-    formData.set('name', 'John Doe')
-    formData.set('email', 'john@example.com')
-    formData.set('phone', '123-456-7890')
-    formData.set('vehicle', 'Toyota Corolla')
-    formData.set('serviceType', 'Regular')
+    fillFormData(formData)
 
     // Mock form submission event
     const submitEvent = new Event('submit')
@@ -67,18 +61,14 @@ describe('BookingApp Booking Submission', () => {
   
   test('submitBooking should handle server errors', async () => {
     // Fill form with valid data first
-    Object.entries({
-      'timeslotId': '123',
-      'location': 'Downtown',
-      'name': 'John Doe',
-      'email': 'john@example.com',
-      'phone': '123-456-7890',
-      'vehicle': 'Toyota Corolla',
-      'serviceType': 'Regular'
-    }).forEach(([name, value]) => {
-      const input = bookingApp.elements.bookingForm.querySelector(`[name="${name}"]`)
+    const formData = new FormData(bookingApp.elements.bookingForm)
+    fillFormData(formData)
+
+    formData.forEach((value, key) => {
+      const input = bookingApp.elements.bookingForm.querySelector(`[name="${key}"]`)
       if (input) input.value = value
-    })
+    }
+    )
 
     // Mock server error
     fetchMock = mockFetch([], false)

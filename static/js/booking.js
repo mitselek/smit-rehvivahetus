@@ -24,6 +24,7 @@ class BookingApp {
   constructor() {
     this.allTimes = []
     this.elements = {}
+    this.apiHost = (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') ? 'http://localhost:5000' : ''
   }
 
   init() {
@@ -80,9 +81,10 @@ class BookingApp {
   async fetchTimes() {
     this.showLoading(true)
     try {
-      const response = await fetch('/api/times')
-      if (!response.ok) {
-        throw new Error(`Failed to fetch available times: ${response.status}`)
+      const url = `${this.apiHost}/api/times`
+      const response = await fetch(url)
+      if (!response || !response.ok) {
+        throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
       }
       const data = await response.json()
       this.allTimes = data
