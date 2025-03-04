@@ -25,10 +25,10 @@ const CONFIG = {
     CAR: '🚗',
     getIcon(type) {
       switch (type) {
-        case 'Truck': return this.TRUCK;
-        case 'SUV': return this.SUV;
-        case 'Car': return this.CAR;
-        default: return this.CAR; // Default icon
+        case 'Truck': return this.TRUCK
+        case 'SUV': return this.SUV
+        case 'Car': return this.CAR
+        default: return this.CAR // Default icon
       }
     }
   }
@@ -324,6 +324,12 @@ class BookingApp {
 
     this.uiElements.bookingModal.classList.remove('hidden')
     this.uiElements.bookingModal.classList.add('visible')
+
+    // Set focus to the first input field (name)
+    const firstInput = this.uiElements.bookingForm.querySelector('input[name="name"], #booking-name')
+    if (firstInput) {
+      firstInput.focus()
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
