@@ -77,33 +77,50 @@ You can test the APIs directly using the `api.http` file:
 
 ### Frontend Tests
 
-**Structure**
-- Initialization and Utility Methods: Tests related to initialization and utility methods.
-- Form Validation: Tests related to form validation.
-- Data Fetching: Tests related to fetching data from the API.
-- Displaying Times: Tests related to displaying time slots.
-- Filtering: Tests related to filtering time slots.
-- Modal Functionality: Tests related to the booking modal.
-- Booking Submission: Tests related to submitting bookings.
-- Integration Tests: Comprehensive tests that cover multiple functionalities.
+**Test Coverage**
+- Core functionality
+  - Initialization (`initialization.test.js`)
+    - DOM element caching
+    - Event listener setup
+    - Utility methods (message display, date formatting)
+  - Utility functions (`utils.test.js`)
+    - Form validation
+    - Date formatting
+    - Vehicle icon selection
+  - Integration tests (`booking.integration.test.js`)
+    - Complete booking flow
+    - Error handling
+    - Time slot interaction
 
-Run tests once:
+See [Pending Test Cases](static/js/tests/TODO.md) for planned test coverage improvements.
+
+**Running Tests**
 ```bash
 npm test
 ```
 
-Run tests in watch mode:
+**Test Files Structure**
+```
+static/js/tests/
+├── booking.integration.test.js  # End-to-end booking flow tests
+├── initialization.test.js       # App initialization tests
+├── setupTests.js               # Test setup and mock DOM
+├── TODO.md                     # Pending test cases
+└── utils.test.js              # Utility function tests
+```
+
+**Watch Mode**
 ```bash
 npm run test:watch
 ```
 
-Testing commands:
-- Press `a` to run all tests
-- Press `f` to run only failed tests
-- Press `o` to run only modified files
-- Press `q` to quit watch mode
+Watch mode commands:
+- `a` - run all tests
+- `f` - run only failed tests
+- `o` - run only modified files
+- `q` - quit watch mode
 
-View test coverage:
+**Coverage Report**
 ```bash
 npm test -- --coverage
 ```
