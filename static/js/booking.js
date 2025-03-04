@@ -225,35 +225,23 @@ class BookingApp {
   }
 
   isDateInRange(date, range) {
-    if (range === 'all') return true
-    
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
-    const oneWeekLater = new Date(today)
-    oneWeekLater.setDate(oneWeekLater.getDate() + 7)
-    
+
     const dateDay = new Date(date)
     dateDay.setHours(0, 0, 0, 0)
-    
-    if (range === 'today' && dateDay.getTime() === today.getTime()) {
-      return true
+
+    switch (range) {
+      case 'today':
+        return dateDay.getTime() === today.getTime()
+      case 'tomorrow':
+        return dateDay.getTime() === today.getTime() + 86400000
+      case 'week':
+        return dateDay.getTime() >= today.getTime() && dateDay.getTime() <= today.getTime() + 604800000
+      case 'all':
+      default:
+        return true
     }
-    
-    if (range === 'tomorrow' && dateDay.getTime() === tomorrow.getTime()) {
-      return true
-    }
-    
-    if (range === 'week' && 
-        dateDay.getTime() >= today.getTime() && 
-        dateDay.getTime() <= oneWeekLater.getTime()) {
-      return true
-    }
-    
-    return false
   }
 
   displayTimes(times) {
@@ -275,10 +263,6 @@ class BookingApp {
     
     // Create time cards
     times.forEach(time => {
-      const timeCard = document.createElement('div')
-      timeCard.className = 'time-card'
-      timeCard.dataset.id = time.id
-      
       const timeDate = new Date(time.time)
       const formattedDate = this.formatDateTime(timeDate, CONFIG.DATE_FORMAT.full)
       const formattedTime = this.formatDateTime(timeDate, CONFIG.DATE_FORMAT.time)
@@ -286,34 +270,16 @@ class BookingApp {
       const vehicleIcon = this.getVehicleIcon(time.vehicleTypes)
       const vehicleTypesText = time.vehicleTypes.join(', ')
       
-      // Create location badge
-      const locationBadge = document.createElement('span')
-      locationBadge.className = 'location-badge'
-      locationBadge.textContent = time.location.substring(0, 3).toUpperCase()
-      
-      // Create booking button
-      const bookButton = document.createElement('button')
-      bookButton.className = 'book-button'
-      bookButton.dataset.id = time.id
-      bookButton.dataset.time = time.time
-      bookButton.dataset.location = time.location
-      bookButton.dataset.vehicleTypes = time.vehicleTypes.join(',')
-      bookButton.textContent = 'Book This Slot'
-      
-      // Build the card
+      const timeCard = document.createElement('div')
+      timeCard.className = 'time-card'
+      timeCard.dataset.id = time.id
       timeCard.innerHTML = `
         <h3>${vehicleIcon} ${formattedDate}</h3>
         <p>Time: ${formattedTime}</p>
         <p>Vehicle Types: ${vehicleTypesText}</p>
-        <p>Location: ${time.location}</p>
+        <p>Location: ${time.location} <span class="location-badge">${time.location.substring(0, 3).toUpperCase()}</span></p>
+        <button class="book-button" data-id="${time.id}" data-time="${time.time}" data-location="${time.location}" data-vehicle-types="${time.vehicleTypes.join(',')}">Book This Slot</button>
       `
-      
-      // Add location badge to the location paragraph
-      const locationParagraph = timeCard.querySelector('p:nth-child(4)')
-      locationParagraph.appendChild(locationBadge)
-      
-      // Add booking button
-      timeCard.appendChild(bookButton)
       
       fragment.appendChild(timeCard)
     })
