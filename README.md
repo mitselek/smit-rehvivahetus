@@ -2,6 +2,13 @@
 
 A web application for browsing available tire change time slots from multiple workshops.
 
+## Features
+
+-   Browse available tire change time slots from multiple workshops.
+-   Filter time slots by vehicle type, location, and date range.
+-   Book appointments online.
+-   Receive confirmation emails.
+
 ## Quick Start
 ```bash
 # Clone and enter directory
