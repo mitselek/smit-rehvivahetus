@@ -277,6 +277,7 @@ class BookingApp {
         this.showMessage('success', `Booking confirmed! Your booking ID is ${data.booking_id}. ${data.message}`)
         this.closeModal()
         await this.fetchTimes()
+        window.scrollTo({ top: 0, behavior: 'smooth' }) // Scroll to top smoothly
         return true
       } else {
         throw new Error(data.error || 'Booking failed')
