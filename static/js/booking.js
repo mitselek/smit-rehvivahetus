@@ -1,4 +1,6 @@
-// Configuration constants
+import { fetchTimesData, updateLocationFilter } from './dataHandler.js'
+import { validateForm, getVehicleIcon, formatDateTime } from './utils.js'
+
 const CONFIG = {
   FEEDBACK_DELAY: 5000,
   DATE_FORMAT: {
@@ -42,17 +44,9 @@ class BookingApp {
   }
 
   setupApp() {
-    // Cache DOM elements first
     this.cacheElements()
-    
-    // Then set up initial state
     this.uiElements.bookingModal.classList.add('hidden')
-    
-    // Bind event handlers
     this.bindEvents()
-    
-    // Initial data load
-    // this.fetchTimes()
   }
 
   cacheElements() {
@@ -112,16 +106,9 @@ class BookingApp {
   async fetchTimes() {
     this.showLoading(true)
     try {
-      const url = `${this.apiHost}/api/times`
-      const response = await fetch(url)
-      if (!response || !response.ok) {
-        throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
-      }
-      const data = await response.json()
+      const data = await fetchTimesData(this.apiHost)
       this.allTimes = data
-      // if (this.env === 'test') {
-      // }
-      this.updateLocationFilter(data)
+      updateLocationFilter(this.uiElements.locationSelect, data)
       this.filterTimes()
     } catch (error) {
       this.showMessage('error', error.message)
@@ -160,37 +147,6 @@ class BookingApp {
     }
   }
 
-  getVehicleIcon(vehicleTypes) {
-    if (vehicleTypes.includes('Truck')) return CONFIG.VEHICLE_ICONS.getIcon('Truck')
-    if (vehicleTypes.includes('SUV')) return CONFIG.VEHICLE_ICONS.getIcon('SUV')
-    return CONFIG.VEHICLE_ICONS.getIcon('Car')
-  }
-
-  updateLocationFilter(times) {
-    const locationSelect = this.uiElements.locationSelect
-    
-    // Clear existing options except the first one
-    while (locationSelect.options.length > 1) {
-      locationSelect.remove(1)
-    }
-    
-    // Get unique locations and sort them
-    const locations = [...new Set(times.map(time => time.location))].sort()
-    
-    // Create document fragment for better performance
-    const fragment = document.createDocumentFragment()
-    
-    // Add location options
-    locations.forEach(location => {
-      const option = document.createElement('option')
-      option.value = location
-      option.textContent = location
-      fragment.appendChild(option)
-    })
-    
-    locationSelect.appendChild(fragment)
-  }
-
   filterTimes() {
     const { vehicleTypeSelect, locationSelect, dateRangeSelect } = this.uiElements
     
@@ -199,22 +155,16 @@ class BookingApp {
     const dateRange = dateRangeSelect.value
     
     let filteredTimes = this.allTimes.filter(time => {
-      // Filter by vehicle type
       if (vehicleType !== 'all' && !time.vehicleTypes.includes(vehicleType)) {
         return false
       }
-      
-      // Filter by location
       if (location !== 'all' && time.location !== location) {
         return false
       }
-      
-      // Filter by date range
       const timeDate = new Date(time.time)
       if (!this.isDateInRange(timeDate, dateRange)) {
         return false
       }
-      
       return true
     })
     
@@ -243,11 +193,8 @@ class BookingApp {
 
   displayTimes(times) {
     const container = this.uiElements.timesContainer
-    
-    // Clear current content
     container.innerHTML = ''
     
-    // Check if we have any times
     if (times.length === 0) {
       const noTimesMessage = document.createElement('p')
       noTimesMessage.textContent = 'No available times match your filters. Please try different criteria.'
@@ -255,16 +202,14 @@ class BookingApp {
       return
     }
     
-    // Create document fragment for better performance
     const fragment = document.createDocumentFragment()
     
-    // Create time cards
     times.forEach(time => {
       const timeDate = new Date(time.time)
-      const formattedDate = this.formatDateTime(timeDate, CONFIG.DATE_FORMAT.full)
-      const formattedTime = this.formatDateTime(timeDate, CONFIG.DATE_FORMAT.time)
+      const formattedDate = formatDateTime(timeDate, CONFIG.DATE_FORMAT.full)
+      const formattedTime = formatDateTime(timeDate, CONFIG.DATE_FORMAT.time)
       
-      const vehicleIcon = this.getVehicleIcon(time.vehicleTypes)
+      const vehicleIcon = getVehicleIcon(time.vehicleTypes, CONFIG.VEHICLE_ICONS)
       const vehicleTypesText = time.vehicleTypes.join(', ')
       
       const timeCard = document.createElement('div')
@@ -281,40 +226,12 @@ class BookingApp {
       fragment.appendChild(timeCard)
     })
     
-    // Add all cards to container
     container.appendChild(fragment)
-  }
-
-  formatDateTime(dateTimeStr, format) {
-    try {
-      let dt
-      if (dateTimeStr instanceof Date) {
-        dt = dateTimeStr
-      } else if (!dateTimeStr) {
-        throw new Error('Invalid date')
-      } else {
-        dt = new Date(dateTimeStr)
-      }
-
-      // Check if the date is valid
-      if (isNaN(dt.getTime())) {
-        throw new Error('Invalid date')
-      }
-
-      return dt.toLocaleString('en-US', format)
-    } catch (error) {
-      // Only log error in development
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Date formatting error:', error)
-      }
-      return 'Invalid date'
-    }
   }
 
   async submitBooking(event) {
     event.preventDefault()
 
-    // Collect form data with proper field mapping
     const formElements = this.uiElements.bookingForm.elements
     const getValue = (name) => formElements[name].value.trim() || formElements[`booking-${name}`].value.trim()
     
@@ -328,8 +245,7 @@ class BookingApp {
       serviceType: getValue('serviceType')
     }
 
-    // Validate form using same data
-    const validation = this.validateForm(bookingData)
+    const validation = validateForm(bookingData)
     if (!validation.valid) {
       this.showMessage('error', validation.message)
       return false
@@ -339,7 +255,7 @@ class BookingApp {
       const response = await fetch('/api/book', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json; charset=utf-8' // Ensure UTF-8 encoding
+          'Content-Type': 'application/json; charset=utf-8'
         },
         body: JSON.stringify(bookingData)
       })
@@ -364,48 +280,6 @@ class BookingApp {
     }
   }
 
-  validateForm(bookingData) {
-    const errors = []
-
-    // Required field validation
-    const requiredFields = {
-      name: 'Please enter your name',
-      email: 'Please enter your email',
-      vehicle: 'Please enter your vehicle details',
-      serviceType: 'Please select a service type',
-      timeslotId: 'No time slot selected',
-      location: 'No location selected'
-    }
-    
-    Object.entries(requiredFields).forEach(([field, message]) => {
-      if (!bookingData[field]) {
-        errors.push(message)
-      }
-    })
-
-    // Additional validation only if field has value
-    const { name, email, phone } = bookingData
-
-    if (name && name.length < 2) {
-      errors.push('Name must be at least 2 characters')
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (email && !emailRegex.test(email)) {
-      errors.push('Please enter a valid email address')
-    }
-
-    const phoneRegex = /^\+?[0-9\s-]{7,}$/
-    if (phone && !phoneRegex.test(phone)) {
-      errors.push('Please enter a valid phone number')
-    }
-
-    return {
-      valid: errors.length === 0,
-      message: errors.join('. ')
-    }
-  }
-
   closeModal() {
     const { bookingModal, bookingForm } = this.uiElements
     bookingModal.classList.add('hidden')
@@ -422,32 +296,34 @@ class BookingApp {
       vehicleTypes: button.dataset.vehicleTypes.split(',')
     }
 
-    // Populate form fields
     this.uiElements.timeslotIdInput.value = timeslot.id
     this.uiElements.locationIdInput.value = timeslot.location
     this.uiElements.appointmentDetailsElement.textContent = 
-      `${this.formatDateTime(new Date(timeslot.time), CONFIG.DATE_FORMAT.full)} at ${timeslot.location} (${timeslot.vehicleTypes.join(', ')})`
+      `${formatDateTime(new Date(timeslot.time), CONFIG.DATE_FORMAT.full)} at ${timeslot.location} (${timeslot.vehicleTypes.join(', ')})`
 
-    // Show modal
     this.uiElements.bookingModal.classList.remove('hidden')
     this.uiElements.bookingModal.classList.add('visible')
 
-    // Add event listener for closing modal on Escape key press, only once
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeModal()
       }
     }, { once: true })
   }
+
+  getVehicleIcon(vehicleTypes) {
+    return getVehicleIcon(vehicleTypes, CONFIG.VEHICLE_ICONS)
+  }
+
+  formatDateTime(dateTimeStr, format) {
+    return formatDateTime(dateTimeStr, format)
+  }
 }
 
-// Initialize only in production, not in tests
 if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
-  // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
     const app = new BookingApp().init()
     app.fetchTimes()
-    // Refresh every minute
     setInterval(() => app.fetchTimes(), 60000)
   })
 }
