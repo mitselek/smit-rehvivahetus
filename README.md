@@ -2,6 +2,26 @@
 
 A web application for browsing available tire change time slots from multiple workshops.
 
+## Quick Start
+```bash
+# Clone and enter directory
+git clone https://github.com/your-username/smit-rehvivahetus.git
+cd smit-rehvivahetus
+
+# One-line setup (Unix/Linux/Mac)
+./setup.sh && npm install && source venv/bin/activate && python app.py
+
+# Or on Windows (PowerShell)
+.\setup.bat; npm install; .\venv\Scripts\activate; python app.py
+```
+Then open http://localhost:5000 in your browser.
+
+Need Docker containers for testing:
+```bash
+docker run -d -p 9003:80 surmus/london-tire-workshop:2.0.1
+docker run -d -p 9004:80 surmus/manchester-tire-workshop:2.0.1
+```
+
 ## Setup
 
 ### Prerequisites
@@ -92,7 +112,7 @@ You can test the APIs directly using the `api.http` file:
     - Error handling
     - Time slot interaction
 
-See [Pending Test Cases](static/js/tests/TODO.md) for planned test coverage improvements.
+See [Vague ideas for Test Cases](static/js/tests/TODO.md) for possible test coverage improvements.
 
 **Running Tests**
 ```bash
