@@ -113,9 +113,6 @@ class BookingApp {
     this.showLoading(true)
     try {
       const url = `${this.apiHost}/api/times`
-      if (this.env === 'test') {
-        console.log('Fetching times from:', url)
-      }
       const response = await fetch(url)
       if (!response || !response.ok) {
         throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
@@ -318,8 +315,8 @@ class BookingApp {
     event.preventDefault()
 
     // Collect form data with proper field mapping
-    const formData = new FormData(this.uiElements.bookingForm)
-    const getValue = (name) => formData.get(name) || formData.get(`booking-${name}`)
+    const formElements = this.uiElements.bookingForm.elements
+    const getValue = (name) => formElements[name].value.trim() || formElements[`booking-${name}`].value.trim()
     
     const bookingData = {
       timeslotId: getValue('timeslotId'),
@@ -332,7 +329,7 @@ class BookingApp {
     }
 
     // Validate form using same data
-    const validation = this.validateForm(formData)
+    const validation = this.validateForm(bookingData)
     if (!validation.valid) {
       this.showMessage('error', validation.message)
       return false
@@ -367,10 +364,9 @@ class BookingApp {
     }
   }
 
-  validateForm(formData) {
+  validateForm(bookingData) {
     const errors = []
-    const getValue = (name) => (formData.get(name) || formData.get(`booking-${name}`) || '').trim()
-    
+
     // Required field validation
     const requiredFields = {
       name: 'Please enter your name',
@@ -382,15 +378,13 @@ class BookingApp {
     }
     
     Object.entries(requiredFields).forEach(([field, message]) => {
-      if (!getValue(field)) {
+      if (!bookingData[field]) {
         errors.push(message)
       }
     })
 
     // Additional validation only if field has value
-    const name = getValue('name')
-    const email = getValue('email')
-    const phone = getValue('phone')
+    const { name, email, phone } = bookingData
 
     if (name && name.length < 2) {
       errors.push('Name must be at least 2 characters')
