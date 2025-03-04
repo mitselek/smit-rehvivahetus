@@ -1,3 +1,6 @@
+// Description: Functions for fetching and updating data from the API
+// Path: static/js/dataHandler.js
+
 export async function fetchTimesData(apiHost) {
   const url = `${apiHost}/api/times`
   const response = await fetch(url)

@@ -1,3 +1,6 @@
+// Description: Utility functions for the booking app
+// Path: static/js/utils.js
+
 export function validateForm(bookingData) {
   const errors = []
 

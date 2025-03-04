@@ -1,3 +1,7 @@
+// Description: Main booking app script for the booking page.
+// Path: static/js/booking.js
+// Dependencies: dataHandler.js, utils.js
+
 import { fetchTimesData, updateLocationFilter } from './dataHandler.js'
 import { validateForm, getVehicleIcon, formatDateTime } from './utils.js'
 
@@ -29,6 +33,9 @@ const CONFIG = {
     }
   }
 }
+
+const millisecondsPerDay = 24 * 60 * 60 * 1e3      // 86400000
+const millisecondsPerWeek = millisecondsPerDay * 7 // 604800000
 
 class BookingApp {
   constructor() {
@@ -182,9 +189,9 @@ class BookingApp {
       case 'today':
         return dateDay.getTime() === today.getTime()
       case 'tomorrow':
-        return dateDay.getTime() === today.getTime() + 86400000
+        return dateDay.getTime() === today.getTime() + millisecondsPerDay
       case 'week':
-        return dateDay.getTime() >= today.getTime() && dateDay.getTime() <= today.getTime() + 604800000
+        return dateDay.getTime() >= today.getTime() && dateDay.getTime() <= today.getTime() + millisecondsPerWeek
       case 'all':
       default:
         return true
