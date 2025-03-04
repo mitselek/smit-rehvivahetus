@@ -396,15 +396,13 @@ class BookingApp {
       errors.push('Name must be at least 2 characters')
     }
 
-    if (email && (!email.includes('@') || !email.includes('.'))) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (email && !emailRegex.test(email)) {
       errors.push('Please enter a valid email address')
     }
 
-    const phoneRegex = [
-      /^\+?[0-9\s-]{7,}$/, // Matches +37212345678, +372 1234 5678, 1234 5678, 123 4567, 12 345 678
-    ]
-
-    if (phone && !phoneRegex.some(regex => regex.test(phone))) {
+    const phoneRegex = /^\+?[0-9\s-]{7,}$/
+    if (phone && !phoneRegex.test(phone)) {
       errors.push('Please enter a valid phone number')
     }
 
