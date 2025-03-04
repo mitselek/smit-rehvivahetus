@@ -170,14 +170,25 @@ python -m pytest --cov=. --cov-report=html
 
 ```
 smit-rehvivahetus/
-├── app.py              # Main Flask application
+├── app.py                 # Main Flask application
+├── requirements.txt       # Python dependencies
+├── package.json           # Node.js dependencies
 ├── static/
-│   ├── css/           # Stylesheets
-│   └── js/            # JavaScript files
-├── templates/         # HTML templates
-├── services/         # API service configurations
-├── tests/           # Test files
-└── venv/            # Python virtual environment
+│   ├── css/styles.css     # Application styles
+│   └── js/
+│       ├── booking.js     # Main booking application
+│       ├── utils.js       # Utility functions
+│       ├── dataHandler.js # API interaction functions
+│       └── tests/         # Frontend tests
+├── templates/
+│   └── index.html         # Main application template
+├── services/
+│   ├── service_info.yaml  # API service configuration
+│   └── *_doc.json         # API documentation files
+├── tests/                 # Backend tests
+├── setup.sh               # Unix setup script
+├── setup.bat              # Windows setup script
+└── venv/                  # Python virtual environment
 ```
 
 ## Contributing
