@@ -77,6 +77,17 @@ class BookingApp {
         this.openBookingModal(e)
       }
     })
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal()
+      }
+    })
+    this.elements.bookingModal.addEventListener('click', (e) => {
+      if (e.target === this.elements.bookingModal) {
+        this.closeModal()
+      }
+    })
   }
 
   async fetchTimes() {
@@ -406,7 +417,7 @@ class BookingApp {
     }
 
     const phoneRegex = [
-      /^\+?[\d\s-]{7,}$/, // Matches +37212345678, +372 1234 5678, 1234 5678, 123 4567, 12 345 678
+      /^\+?[0-9\s-]{7,}$/, // Matches +37212345678, +372 1234 5678, 1234 5678, 123 4567, 12 345 678
     ]
 
     if (phone && !phoneRegex.some(regex => regex.test(phone))) {
