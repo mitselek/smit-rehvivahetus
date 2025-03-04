@@ -1,0 +1,53 @@
+[
+    {
+      "id": "5cdae779-994a-4e5c-89b0-a55fc7e45164", 
+      "location": "London", 
+      "time": "2025-03-04T09:00:00Z", 
+      "vehicleTypes": [
+        "Car"
+      ]
+    }, 
+    {
+      "id": 47, 
+      "location": "Manchester", 
+      "time": "2025-03-04T09:00:00Z", 
+      "vehicleTypes": [
+        "Car", 
+        "Truck"
+      ]
+    }, 
+    {
+      "id": "b5534bf6-0083-4692-8b4e-a4dbcb211c18", 
+      "location": "London", 
+      "time": "2025-03-04T10:00:00Z", 
+      "vehicleTypes": [
+        "Car"
+      ]
+    }, 
+    {
+      "id": 48, 
+      "location": "Manchester", 
+      "time": "2025-03-04T10:00:00Z", 
+      "vehicleTypes": [
+        "Car", 
+        "Truck"
+      ]
+    }, 
+    {
+      "id": "8945f9ee-6147-4372-b866-4c1f823c6060", 
+      "location": "London", 
+      "time": "2025-03-04T11:00:00Z", 
+      "vehicleTypes": [
+        "Car"
+      ]
+    }, 
+    {
+      "id": 49, 
+      "location": "Manchester", 
+      "time": "2025-03-04T11:00:00Z", 
+      "vehicleTypes": [
+        "Car", 
+        "Truck"
+      ]
+    }
+]

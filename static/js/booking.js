@@ -25,7 +25,7 @@ class BookingApp {
     this.allTimes = []
     this.elements = {}
     this.env = (typeof process !== 'undefined' && process.env.NODE_ENV) ? process.env.NODE_ENV : 'development'
-    this.apiHost = (this.env === 'test') ? 'http://localhost:5001' : ''
+    this.apiHost = (this.env === 'test') ? 'http://localhost:5000' : ''
   }
 
   init() {

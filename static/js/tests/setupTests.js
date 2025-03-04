@@ -45,9 +45,6 @@ export const fillFormData = (formData) => {
   formData.set('serviceType', 'Regular')
 }
 
-// Update testApiHost to use our proxy
-export const testApiHost = 'http://localhost:5001'
-
 // Setup timers and scroll for tests
 export const setupTimersAndScroll = () => {
   jest.useFakeTimers()
