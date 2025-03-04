@@ -23,55 +23,55 @@ describe('BookingApp Initialization and Utility Methods', () => {
 
   describe('Initialization', () => {
     test('should cache DOM elements', () => {
-      expect(bookingApp.elements.bookingModal).toBeDefined()
-      expect(bookingApp.elements.vehicleTypeSelect).toBeDefined()
-      expect(bookingApp.elements.locationSelect).toBeDefined()
-      expect(bookingApp.elements.dateRangeSelect).toBeDefined()
-      expect(bookingApp.elements.timesContainer).toBeDefined()
-      expect(bookingApp.elements.loadingElement).toBeDefined()
-      expect(bookingApp.elements.errorMessage).toBeDefined()
-      expect(bookingApp.elements.successMessage).toBeDefined()
-      expect(bookingApp.elements.bookingForm).toBeDefined()  
-      expect(bookingApp.elements.closeModalButton).toBeDefined()
-      expect(bookingApp.elements.timeslotIdInput).toBeDefined()
-      expect(bookingApp.elements.locationIdInput).toBeDefined()
-      expect(bookingApp.elements.appointmentDetailsElement).toBeDefined()
+      expect(bookingApp.uiElements.bookingModal).toBeDefined()
+      expect(bookingApp.uiElements.vehicleTypeSelect).toBeDefined()
+      expect(bookingApp.uiElements.locationSelect).toBeDefined()
+      expect(bookingApp.uiElements.dateRangeSelect).toBeDefined()
+      expect(bookingApp.uiElements.timesContainer).toBeDefined()
+      expect(bookingApp.uiElements.loadingElement).toBeDefined()
+      expect(bookingApp.uiElements.errorMessage).toBeDefined()
+      expect(bookingApp.uiElements.successMessage).toBeDefined()
+      expect(bookingApp.uiElements.bookingForm).toBeDefined()  
+      expect(bookingApp.uiElements.closeModalButton).toBeDefined()
+      expect(bookingApp.uiElements.timeslotIdInput).toBeDefined()
+      expect(bookingApp.uiElements.locationIdInput).toBeDefined()
+      expect(bookingApp.uiElements.appointmentDetailsElement).toBeDefined()
     })
   })
 
   describe('Utility Methods', () => {
     test('showLoading should toggle the loading element visibility', () => {
       bookingApp.showLoading(true)
-      expect(bookingApp.elements.loadingElement.classList.contains('hidden')).toBe(false)
+      expect(bookingApp.uiElements.loadingElement.classList.contains('hidden')).toBe(false)
 
       bookingApp.showLoading(false)
-      expect(bookingApp.elements.loadingElement.classList.contains('hidden')).toBe(true)
+      expect(bookingApp.uiElements.loadingElement.classList.contains('hidden')).toBe(true)
     })
 
     test('showMessage should display error message', () => {
       const errorMessage = 'This is an error'
       bookingApp.showMessage('error', errorMessage)
 
-      expect(bookingApp.elements.errorMessage.textContent).toBe(errorMessage)
-      expect(bookingApp.elements.errorMessage.classList.contains('hidden')).toBe(false)
-      expect(bookingApp.elements.successMessage.classList.contains('hidden')).toBe(true)
+      expect(bookingApp.uiElements.errorMessage.textContent).toBe(errorMessage)
+      expect(bookingApp.uiElements.errorMessage.classList.contains('hidden')).toBe(false)
+      expect(bookingApp.uiElements.successMessage.classList.contains('hidden')).toBe(true)
 
       // Test auto-hide
       jest.advanceTimersByTime(CONFIG.FEEDBACK_DELAY)
-      expect(bookingApp.elements.errorMessage.classList.contains('hidden')).toBe(true)
+      expect(bookingApp.uiElements.errorMessage.classList.contains('hidden')).toBe(true)
     })
 
     test('showMessage should display success message', () => {
       const successMessage = 'This is a success'
       bookingApp.showMessage('success', successMessage)
 
-      expect(bookingApp.elements.successMessage.textContent).toBe(successMessage)
-      expect(bookingApp.elements.successMessage.classList.contains('hidden')).toBe(false)
-      expect(bookingApp.elements.errorMessage.classList.contains('hidden')).toBe(true)
+      expect(bookingApp.uiElements.successMessage.textContent).toBe(successMessage)
+      expect(bookingApp.uiElements.successMessage.classList.contains('hidden')).toBe(false)
+      expect(bookingApp.uiElements.errorMessage.classList.contains('hidden')).toBe(true)
 
       // Test auto-hide
       jest.advanceTimersByTime(CONFIG.FEEDBACK_DELAY)
-      expect(bookingApp.elements.successMessage.classList.contains('hidden')).toBe(true)
+      expect(bookingApp.uiElements.successMessage.classList.contains('hidden')).toBe(true)
     })
 
     test('formatDateTime should format dates correctly', () => {
@@ -93,10 +93,10 @@ describe('BookingApp Initialization and Utility Methods', () => {
     })
 
     test('getVehicleIcon should return correct icons', () => {
-      expect(bookingApp.getVehicleIcon(['Truck', 'Car'])).toBe(CONFIG.VEHICLE_ICONS.Truck)
-      expect(bookingApp.getVehicleIcon(['SUV'])).toBe(CONFIG.VEHICLE_ICONS.SUV)
-      expect(bookingApp.getVehicleIcon(['Car'])).toBe(CONFIG.VEHICLE_ICONS.Car)
-      expect(bookingApp.getVehicleIcon(['Car', 'SUV'])).toBe(CONFIG.VEHICLE_ICONS.SUV)
+      expect(bookingApp.getVehicleIcon(['Truck', 'Car'])).toBe(CONFIG.VEHICLE_ICONS.getIcon('Truck'))
+      expect(bookingApp.getVehicleIcon(['SUV'])).toBe(CONFIG.VEHICLE_ICONS.getIcon('SUV'))
+      expect(bookingApp.getVehicleIcon(['Car'])).toBe(CONFIG.VEHICLE_ICONS.getIcon('Car'))
+      expect(bookingApp.getVehicleIcon(['Car', 'SUV'])).toBe(CONFIG.VEHICLE_ICONS.getIcon('SUV'))
     })
 
     test('isDateInRange should filter dates correctly', () => {

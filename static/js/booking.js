@@ -31,7 +31,7 @@ const CONFIG = {
 class BookingApp {
   constructor() {
     this.allTimes = []
-    this.elements = {}
+    this.uiElements = {}
     this.env = (typeof process !== 'undefined' && process.env.NODE_ENV) ? process.env.NODE_ENV : 'development'
     this.apiHost = (this.env === 'test') ? 'http://localhost:5000' : ''
   }
@@ -46,7 +46,7 @@ class BookingApp {
     this.cacheElements()
     
     // Then set up initial state
-    this.elements.bookingModal.classList.add('hidden')
+    this.uiElements.bookingModal.classList.add('hidden')
     
     // Bind event handlers
     this.bindEvents()
@@ -56,31 +56,39 @@ class BookingApp {
   }
 
   cacheElements() {
-    this.elements = {
-      bookingModal: document.getElementById('booking-modal'),
-      vehicleTypeSelect: document.getElementById('vehicle-type-filter'),
-      locationSelect: document.getElementById('location-filter'),
-      dateRangeSelect: document.getElementById('date-range-filter'),
-      timesContainer: document.getElementById('times-container'),
-      loadingElement: document.getElementById('loading'),
-      errorMessage: document.getElementById('error-message'),
-      successMessage: document.getElementById('success-message'),
-      bookingForm: document.getElementById('booking-form'),
-      closeModalButton: document.getElementById('close-modal'),
-      timeslotIdInput: document.getElementById('booking-timeslot-id'),
-      locationIdInput: document.getElementById('booking-location'),
-      appointmentDetailsElement: document.getElementById('booking-appointment-details')
+    const getElement = (selector) => {
+      const element = document.querySelector(selector)
+      if (!element) {
+        console.warn(`Element not found: ${selector}`)
+      }
+      return element
+    }
+
+    this.uiElements = {
+      bookingModal: getElement('#booking-modal'),
+      vehicleTypeSelect: getElement('#vehicle-type-filter'),
+      locationSelect: getElement('#location-filter'),
+      dateRangeSelect: getElement('#date-range-filter'),
+      timesContainer: getElement('#times-container'),
+      loadingElement: getElement('#loading'),
+      errorMessage: getElement('#error-message'),
+      successMessage: getElement('#success-message'),
+      bookingForm: getElement('#booking-form'),
+      closeModalButton: getElement('#close-modal'),
+      timeslotIdInput: getElement('#booking-timeslot-id'),
+      locationIdInput: getElement('#booking-location'),
+      appointmentDetailsElement: getElement('#booking-appointment-details')
     }
   }
 
   bindEvents() {
-    this.elements.vehicleTypeSelect.addEventListener('change', () => this.filterTimes())
-    this.elements.locationSelect.addEventListener('change', () => this.filterTimes())
-    this.elements.dateRangeSelect.addEventListener('change', () => this.filterTimes())
-    this.elements.closeModalButton.addEventListener('click', () => this.closeModal())
-    this.elements.bookingForm.addEventListener('submit', (e) => this.submitBooking(e))
+    this.uiElements.vehicleTypeSelect.addEventListener('change', () => this.filterTimes())
+    this.uiElements.locationSelect.addEventListener('change', () => this.filterTimes())
+    this.uiElements.dateRangeSelect.addEventListener('change', () => this.filterTimes())
+    this.uiElements.closeModalButton.addEventListener('click', () => this.closeModal())
+    this.uiElements.bookingForm.addEventListener('submit', (e) => this.submitBooking(e))
     
-    this.elements.timesContainer.addEventListener('click', (e) => {
+    this.uiElements.timesContainer.addEventListener('click', (e) => {
       if (e.target.classList.contains('book-button')) {
         this.openBookingModal(e)
       }
@@ -91,8 +99,8 @@ class BookingApp {
         this.closeModal()
       }
     })
-    this.elements.bookingModal.addEventListener('click', (e) => {
-      if (e.target === this.elements.bookingModal) {
+    this.uiElements.bookingModal.addEventListener('click', (e) => {
+      if (e.target === this.uiElements.bookingModal) {
         this.closeModal()
       }
     })
@@ -124,11 +132,11 @@ class BookingApp {
   }
 
   showLoading(show) {
-    this.elements.loadingElement.classList.toggle('hidden', !show)
+    this.uiElements.loadingElement.classList.toggle('hidden', !show)
   }
 
   showMessage(type, message) {
-    const { errorMessage, successMessage } = this.elements
+    const { errorMessage, successMessage } = this.uiElements
     
     errorMessage.classList.add('hidden')
     successMessage.classList.add('hidden')
@@ -159,7 +167,7 @@ class BookingApp {
   }
 
   updateLocationFilter(times) {
-    const locationSelect = this.elements.locationSelect
+    const locationSelect = this.uiElements.locationSelect
     
     // Clear existing options except the first one
     while (locationSelect.options.length > 1) {
@@ -184,7 +192,7 @@ class BookingApp {
   }
 
   filterTimes() {
-    const { vehicleTypeSelect, locationSelect, dateRangeSelect } = this.elements
+    const { vehicleTypeSelect, locationSelect, dateRangeSelect } = this.uiElements
     
     const vehicleType = vehicleTypeSelect.value
     const location = locationSelect.value
@@ -246,7 +254,7 @@ class BookingApp {
   }
 
   displayTimes(times) {
-    const container = this.elements.timesContainer
+    const container = this.uiElements.timesContainer
     
     // Clear current content
     container.innerHTML = ''
@@ -341,7 +349,7 @@ class BookingApp {
     event.preventDefault()
 
     // Collect form data with proper field mapping
-    const formData = new FormData(this.elements.bookingForm)
+    const formData = new FormData(this.uiElements.bookingForm)
     const getValue = (name) => formData.get(name) || formData.get(`booking-${name}`)
     
     const bookingData = {
@@ -439,9 +447,9 @@ class BookingApp {
   }
 
   closeModal() {
-    this.elements.bookingModal.classList.add('hidden')
-    this.elements.bookingModal.classList.remove('visible')
-    this.elements.bookingForm.reset()
+    this.uiElements.bookingModal.classList.add('hidden')
+    this.uiElements.bookingModal.classList.remove('visible')
+    this.uiElements.bookingForm.reset()
   }
 
   openBookingModal(event) {
@@ -454,14 +462,14 @@ class BookingApp {
     }
 
     // Populate form fields
-    this.elements.timeslotIdInput.value = timeslot.id
-    this.elements.locationIdInput.value = timeslot.location
-    this.elements.appointmentDetailsElement.textContent = 
+    this.uiElements.timeslotIdInput.value = timeslot.id
+    this.uiElements.locationIdInput.value = timeslot.location
+    this.uiElements.appointmentDetailsElement.textContent = 
       `${this.formatDateTime(new Date(timeslot.time), CONFIG.DATE_FORMAT.full)} at ${timeslot.location} (${timeslot.vehicleTypes.join(', ')})`
 
     // Show modal
-    this.elements.bookingModal.classList.remove('hidden')
-    this.elements.bookingModal.classList.add('visible')
+    this.uiElements.bookingModal.classList.remove('hidden')
+    this.uiElements.bookingModal.classList.add('visible')
   }
 
   // ...rest of the class implementation...
