@@ -81,7 +81,9 @@
                 
                 <div class="form-group">
                     <label for="booking-phone">Phone Number:</label>
-                    <input type="tel" id="booking-phone" name="phone" required autocomplete="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Format: 123-456-7890">
+                    <input type="tel" id="booking-phone" name="phone" required autocomplete="tel" 
+                        pattern="^\+?[\d\s-]{7,}$" 
+                        placeholder="Format: +37212345678, +372 1234 5678, 1234 5678, 123 4567, 12 345 678">
                 </div>
                 
                 <div class="form-group">

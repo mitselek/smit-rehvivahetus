@@ -80,7 +80,6 @@ class BookingApp {
   }
 
   async fetchTimes() {
-    console.time('Fetch times')
     this.showLoading(true)
     try {
       const url = `${this.apiHost}/api/times`
@@ -91,11 +90,7 @@ class BookingApp {
       if (!response || !response.ok) {
         throw new Error(`Failed to fetch available times: ${response ? response.status : 'No response'}`)
       }
-      console.time('Fetch times')
-      console.log('got response')
       const data = await response.json()
-      console.time('Fetch times')
-      console.log('Fetched times:', data.length)
       this.allTimes = data
       // if (this.env === 'test') {
       // }
@@ -378,7 +373,7 @@ class BookingApp {
 
   validateForm(formData) {
     const errors = []
-    const getValue = (name) => formData.get(name) || formData.get(`booking-${name}`)
+    const getValue = (name) => (formData.get(name) || formData.get(`booking-${name}`) || '').trim()
     
     // Required field validation
     const requiredFields = {
@@ -396,11 +391,11 @@ class BookingApp {
       }
     })
 
-    // Only run additional validation if we have values
+    // Additional validation only if field has value
     const name = getValue('name')
     const email = getValue('email')
     const phone = getValue('phone')
-    const serviceType = getValue('serviceType')
+    console.log(formData)
 
     if (name && name.length < 2) {
       errors.push('Name must be at least 2 characters')
@@ -410,12 +405,12 @@ class BookingApp {
       errors.push('Please enter a valid email address')
     }
 
-    if (phone && !/^\+?[\d\s-]{7,}$/.test(phone)) {
-      errors.push('Please enter a valid phone number')
-    }
+    const phoneRegex = [
+      /^\+?[\d\s-]{7,}$/, // Matches +37212345678, +372 1234 5678, 1234 5678, 123 4567, 12 345 678
+    ]
 
-    if (serviceType === '') {
-      errors.push('Please select a service type')
+    if (phone && !phoneRegex.some(regex => regex.test(phone))) {
+      errors.push('Please enter a valid phone number')
     }
 
     return {
