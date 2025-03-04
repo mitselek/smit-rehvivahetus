@@ -25,7 +25,23 @@ export const mockDOM = () => {
     <div id="loading" class="loading hidden">Loading...</div>
     <div id="error-message" class="message error hidden"></div>
     <div id="success-message" class="message success hidden"></div>
-    <div id="times-container"></div>
+    
+    <!-- Times Container with Sample Time Card -->
+    <div id="times-container">
+      <div class="time-card" data-id="123">
+        <h3>🚗 Saturday, March 15, 2025</h3>
+        <p>Time: 2:30 PM</p>
+        <p>Vehicle Types: Car, SUV</p>
+        <p>Location: Test Location <span class="location-badge">TES</span></p>
+        <button class="book-button" 
+          data-id="123" 
+          data-time="2025-03-15T14:30:00" 
+          data-location="Test Location" 
+          data-vehicle-types="Car,SUV">
+          Book This Slot
+        </button>
+      </div>
+    </div>
 
     <!-- Booking Modal -->
     <div id="booking-modal" class="modal-overlay hidden">
