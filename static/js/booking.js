@@ -82,13 +82,15 @@ class BookingApp {
   }
 
   bindEvents() {
-    this.uiElements.vehicleTypeSelect.addEventListener('change', () => this.filterTimes())
-    this.uiElements.locationSelect.addEventListener('change', () => this.filterTimes())
-    this.uiElements.dateRangeSelect.addEventListener('change', () => this.filterTimes())
-    this.uiElements.closeModalButton.addEventListener('click', () => this.closeModal())
-    this.uiElements.bookingForm.addEventListener('submit', (e) => this.submitBooking(e))
-    
-    this.uiElements.timesContainer.addEventListener('click', (e) => {
+    const { vehicleTypeSelect, locationSelect, dateRangeSelect, closeModalButton, bookingForm, timesContainer, bookingModal } = this.uiElements
+
+    vehicleTypeSelect.addEventListener('change', () => this.filterTimes())
+    locationSelect.addEventListener('change', () => this.filterTimes())
+    dateRangeSelect.addEventListener('change', () => this.filterTimes())
+    closeModalButton.addEventListener('click', () => this.closeModal())
+    bookingForm.addEventListener('submit', (e) => this.submitBooking(e))
+
+    timesContainer.addEventListener('click', (e) => {
       if (e.target.classList.contains('book-button')) {
         this.openBookingModal(e)
       }
@@ -99,8 +101,9 @@ class BookingApp {
         this.closeModal()
       }
     })
-    this.uiElements.bookingModal.addEventListener('click', (e) => {
-      if (e.target === this.uiElements.bookingModal) {
+
+    bookingModal.addEventListener('click', (e) => {
+      if (e.target === bookingModal) {
         this.closeModal()
       }
     })
@@ -422,7 +425,6 @@ class BookingApp {
     const name = getValue('name')
     const email = getValue('email')
     const phone = getValue('phone')
-    console.log(formData)
 
     if (name && name.length < 2) {
       errors.push('Name must be at least 2 characters')
@@ -447,9 +449,10 @@ class BookingApp {
   }
 
   closeModal() {
-    this.uiElements.bookingModal.classList.add('hidden')
-    this.uiElements.bookingModal.classList.remove('visible')
-    this.uiElements.bookingForm.reset()
+    const { bookingModal, bookingForm } = this.uiElements
+    bookingModal.classList.add('hidden')
+    bookingModal.classList.remove('visible')
+    bookingForm.reset()
   }
 
   openBookingModal(event) {
@@ -470,9 +473,14 @@ class BookingApp {
     // Show modal
     this.uiElements.bookingModal.classList.remove('hidden')
     this.uiElements.bookingModal.classList.add('visible')
-  }
 
-  // ...rest of the class implementation...
+    // Add event listener for closing modal on Escape key press, only once
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal()
+      }
+    }, { once: true })
+  }
 }
 
 // Initialize only in production, not in tests
