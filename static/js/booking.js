@@ -270,7 +270,20 @@ class BookingApp {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Server error')
+        switch (response.status) {
+          case 400:
+            throw new Error(data.error || 'Bad Request')
+          case 401:
+            throw new Error(data.error || 'Unauthorized')
+          case 403:
+            throw new Error(data.error || 'Forbidden')
+          case 404:
+            throw new Error(data.error || 'Not Found')
+          case 500:
+            throw new Error(data.error || 'Internal Server Error')
+          default:
+            throw new Error(data.error || 'Unknown Error')
+        }
       }
 
       if (data.success) {
