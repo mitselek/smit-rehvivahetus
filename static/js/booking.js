@@ -14,9 +14,17 @@ const CONFIG = {
     }
   },
   VEHICLE_ICONS: {
-    'Truck': '🚚',
-    'SUV': '🚙',
-    'Car': '🚗'
+    TRUCK: '🚚',
+    SUV: '🚙',
+    CAR: '🚗',
+    getIcon(type) {
+      switch (type) {
+        case 'Truck': return this.TRUCK;
+        case 'SUV': return this.SUV;
+        case 'Car': return this.CAR;
+        default: return this.CAR; // Default icon
+      }
+    }
   }
 }
 
@@ -145,9 +153,9 @@ class BookingApp {
   }
 
   getVehicleIcon(vehicleTypes) {
-    if (vehicleTypes.includes('Truck')) return CONFIG.VEHICLE_ICONS.Truck
-    if (vehicleTypes.includes('SUV')) return CONFIG.VEHICLE_ICONS.SUV
-    return CONFIG.VEHICLE_ICONS.Car
+    if (vehicleTypes.includes('Truck')) return CONFIG.VEHICLE_ICONS.getIcon('Truck')
+    if (vehicleTypes.includes('SUV')) return CONFIG.VEHICLE_ICONS.getIcon('SUV')
+    return CONFIG.VEHICLE_ICONS.getIcon('Car')
   }
 
   updateLocationFilter(times) {
